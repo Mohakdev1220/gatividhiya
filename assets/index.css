@@ -94,5 +94,8 @@
         @media (max-width: 768px) { 
             .stats-grid { grid-template-columns: 1fr; } 
             .entry-grid { grid-template-columns: 1fr; } 
+                
+     footer { padding: 40px; text-align: center; background: #fff; border-top: 1px solid #f2f2f7; display:none; }
+    .f-link { color: var(--primary); text-decoration: none; font-weight: 600; margin: 0 10px; font-size: 0.9rem; }
+
         }
-    
