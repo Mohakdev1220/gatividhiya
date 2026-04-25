@@ -95,23 +95,33 @@
             .stats-grid { grid-template-columns: 1fr; } 
             .entry-grid { grid-template-columns: 1fr; } }
 
-footer { 
-    width: 100%;            /* Sabse zaroori: poori width dene ke liye */
-    display: block;         /* Taaki ye ek poori line occupy kare */
-    text-align: center;     /* Content ko center karne ke liye */
-    padding: 40px 0; 
+/* Footer Fix - Media Query ke BAHAR rakhein */
+#footer { 
+    width: 100%;            
+    display: block;         
+    text-align: center;     
+    padding: 60px 20px;     
     background: var(--surface); 
     border-top: 1px solid var(--border);
-    box-sizing: border-box; /* Padding ko width ke andar rakhne ke liye */
-    clear: both;            /* Agar koi cheez float ho rahi ho toh use hatane ke liye */
+    box-sizing: border-box;
+    margin-top: 50px;       /* Container se gap banane ke liye */
 }
 
-/* Links ko bhi inline-block rakhein taaki wo line ke beech mein rahein */
 .f-link { 
     display: inline-block;
     color: var(--accent); 
     text-decoration: none; 
     font-weight: 600; 
-    margin: 0 10px; 
+    margin: 10px 15px; 
     font-size: 0.9rem; 
+    transition: opacity 0.2s;
+}
+
+.f-link:hover {
+    opacity: 0.8;
+}
+
+/* Ensure body doesn't have extra padding that pushes footer */
+body {
+    padding-bottom: 0 !important; 
 }
