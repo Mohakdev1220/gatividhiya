@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gatividhi Tracker | Toolify</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+      <link rel="stylesheet" href="assets/Index.css">
+  
+</head>
+<body>
+
+<div id="editModal" class="modal-overlay">
+    <div class="modal-card">
+        <h2 style="font-weight: 800; font-size: 1.3rem; margin-bottom: 10px;">Edit Activity</h2>
+        <p style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 20px;">Update the name and goal for this month.</p>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div class="input-wrapper">
+                <input type="text" id="editName" placeholder="Enter activity name here...">
+                <span class="clear-btn" onclick="document.getElementById('editName').value=''">×</span>
+            </div>
+            <div class="input-wrapper">
+                <input type="number" id="editTarget" placeholder="Enter number of days here...">
+                <span class="clear-btn" onclick="document.getElementById('editTarget').value=''">×</span>
+            </div>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 25px;">
+            <button class="m-btn m-btn-cancel" style="flex:1; padding:14px; border-radius:12px; border:none; cursor:pointer; font-weight:800; background:var(--bg); color:var(--text-main); border: 1px solid var(--border);" onclick="closeModals()">Cancel</button>
+            <button class="m-btn m-btn-confirm" style="flex:1; padding:14px; border-radius:12px; border:none; cursor:pointer; font-weight:800; background:var(--accent); color:white;" id="saveEditBtn">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<div id="deleteModal" class="modal-overlay">
+    <div class="modal-card">
+        <h2 style="font-weight: 800; font-size: 1.3rem; margin-bottom: 10px; color: var(--danger);">Delete Activity?</h2>
+        <p style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 20px;">This will permanently remove the activity and all logged history. This cannot be undone.</p>
+        <div style="display: flex; gap: 10px; margin-top: 25px;">
+            <button class="m-btn m-btn-cancel" style="flex:1; padding:14px; border-radius:12px; border:none; cursor:pointer; font-weight:800; background:var(--bg); color:var(--text-main); border: 1px solid var(--border);" onclick="closeModals()">Cancel</button>
+            <button class="m-btn m-btn-danger" style="flex:1; padding:14px; border-radius:12px; border:none; cursor:pointer; font-weight:800; background:var(--danger); color:white;" id="confirmDelBtn">Confirm Delete</button>
+        </div>
+    </div>
+</div>
+
+<nav class="top-nav">
+    <div class="logo">Gatividhi Tracker <span>by Toolify</span></div>
+    <div>
+        <div id="liveTime">00:00:00 PM</div>
+        <div id="liveDate">LOADING...</div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="tabs">
+        <button class="tab active" id="tab-track" onclick="switchView('track')">Tracking</button>
+        <button class="tab" id="tab-stats" onclick="switchView('stats')">Analytics</button>
+        <button onclick="toggleTheme()" style="background:none; border:none; cursor:pointer; margin-left:15px; font-size: 1.2rem;">🌓</button>
+    </div>
+
+    <div id="trackView">
+        <div class="suggestion-label">Quick Add <span>Scroll for more →</span></div>
+        <div class="suggestion-row" id="chips">
+            <div class="chip" onclick="quickAdd('Math Practice 📚')">Math Practice 📚</div>
+            <div class="chip" onclick="quickAdd('Current Affairs 📰')">Current Affairs 📰</div>
+            <div class="chip" onclick="quickAdd('Swimming 🏊')">Swimming 🏊</div>
+            <div class="chip" onclick="quickAdd('Gym Workout 🏋️')">Gym Workout 🏋️</div>
+            <div class="chip" onclick="quickAdd('Cycling 🚴')">Cycling 🚴</div>
+            <div class="chip" onclick="quickAdd('Running 🏃')">Running 🏃</div>
+            <div class="chip" onclick="quickAdd('Reading 📖')">Reading 📖</div>
+            <div class="chip" onclick="quickAdd('Coding 💻')">Coding 💻</div>
+        </div>
+
+        <div class="cal-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="font-weight: 800; font-size: 1.1rem;">Daily Check-ins</h3>
+            <input type="date" id="calInput" class="custom-date" style="background: var(--surface); color: var(--accent); border: 1px solid var(--border); padding: 10px 15px; border-radius: 12px; font-weight: 800; cursor: pointer;" onchange="refreshUI()">
+        </div>
+
+        <div class="card">
+            <div class="entry-grid">
+                <div class="input-wrapper">
+                    <input type="text" id="tName" placeholder="Enter activity name here...">
+                    <span class="clear-btn" onclick="document.getElementById('tName').value=''">×</span>
+                </div>
+                <div class="input-wrapper">
+                    <input type="number" id="tTarget" placeholder="Enter number of days here...">
+                    <span class="clear-btn" onclick="document.getElementById('tTarget').value=''">×</span>
+                </div>
+                <button class="btn-add" onclick="addTask()">ADD</button>
+            </div>
+        </div>
+
+        <div class="list-grid" id="taskList"></div>
+    </div>
+
+    <div id="statsView" style="display: none;">
+        <div class="stats-grid">
+            <div class="card">
+                <div class="stat-header">7-DAY ACTIVITY TREND <span id="rangeLabel"></span></div>
+                <div style="height: 250px; position: relative;"><canvas id="lineChart"></canvas></div>
+                <div class="graph-nav">
+                    <button class="nav-btn" onclick="changeGraphRange(-1)">← Earlier</button>
+                    <button class="nav-btn" onclick="changeGraphRange(1)">Later →</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="stat-header">TODAY'S COMPLETION</div>
+                <div style="height: 250px; position: relative;"><canvas id="pieChart"></canvas></div>
+            </div>
+        </div>
+        <div id="monthList"></div>
+    </div>
+</div>
+
+    <script type="module" src="assets/Index.js"></script>
+
+
+</body>
+</html>
