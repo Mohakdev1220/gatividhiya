@@ -93,8 +93,8 @@
 
         @media (max-width: 768px) { 
             .stats-grid { grid-template-columns: 1fr; } 
-            .entry-grid { grid-template-columns: 1fr; } 
-        }
+            .entry-grid { grid-template-columns: 1fr; } }
+
 footer { 
     width: 100%;            /* Sabse zaroori: poori width dene ke liye */
     display: block;         /* Taaki ye ek poori line occupy kare */
