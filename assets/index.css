@@ -94,18 +94,21 @@
         @media (max-width: 768px) { 
             .stats-grid { grid-template-columns: 1fr; } 
             .entry-grid { grid-template-columns: 1fr; } 
-                
- footer { 
-    padding: 40px 20px; 
-    text-align: center; 
-    background: var(--surface); /* Surface use karein taaki theme ke sath chale */
-    border-top: 1px solid var(--border); 
-    width: 100%;           /* Zaroori: taaki poori screen cover kare */
-    display: block;        /* none se block kar dein agar dikhana hai */
-    box-sizing: border-box; /* Padding ko width ke andar adjust karne ke liye */
+        }
+footer { 
+    width: 100%;            /* Sabse zaroori: poori width dene ke liye */
+    display: block;         /* Taaki ye ek poori line occupy kare */
+    text-align: center;     /* Content ko center karne ke liye */
+    padding: 40px 0; 
+    background: var(--surface); 
+    border-top: 1px solid var(--border);
+    box-sizing: border-box; /* Padding ko width ke andar rakhne ke liye */
+    clear: both;            /* Agar koi cheez float ho rahi ho toh use hatane ke liye */
 }
 
+/* Links ko bhi inline-block rakhein taaki wo line ke beech mein rahein */
 .f-link { 
+    display: inline-block;
     color: var(--accent); 
     text-decoration: none; 
     font-weight: 600; 
