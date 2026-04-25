@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gatividhi Tracker | Toolify</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #0a0b0d; --surface: #16181d; --accent: #3b82f6; 
+            --success: #10b981; --danger: #ef4444; --text-main: #ffffff; --text-dim: #94a3b8; 
+            --border: #26292f; --calendar-inv: invert(1);
+            --modal-bg: rgba(10, 11, 13, 0.85);
+        }
+        [data-theme="light"] {
+            --bg: #f3f6f9; --surface: #ffffff; --accent: #2563eb; 
+            --success: #059669; --danger: #dc2626; --text-main: #1e293b; --text-dim: #64748b; 
+            --border: #e2e8f0; --calendar-inv: invert(0);
+            --modal-bg: rgba(243, 246, 249, 0.85);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; transition: background 0.3s, color 0.3s, border 0.3s; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); padding-bottom: 50px; line-height: 1.5; overflow-x: hidden; }
+
+        /* Navigation */
+        .top-nav { background: var(--surface); padding: 12px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
+        .logo { font-weight: 800; font-size: 1.1rem; line-height: 1; }
+        .logo span { display: block; font-size: 0.65rem; font-weight: 600; color: var(--accent); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        #liveTime { font-weight: 800; color: var(--accent); font-size: 1.1rem; text-align: right;}
+        #liveDate { font-size: 0.7rem; color: var(--text-dim); text-align: right; text-transform: uppercase; font-weight: 600;}
+
+        .container { max-width: 900px; margin: 20px auto; padding: 0 15px; }
+        
+        /* Quick Suggestions */
+        .suggestion-label { font-size: 0.7rem; font-weight: 800; color: var(--text-dim); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between;}
+        .suggestion-label span { color: var(--accent); font-size: 0.6rem; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+        .suggestion-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 10px; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+        .suggestion-row::-webkit-scrollbar { height: 4px; display: block; }
+        .suggestion-row::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+        .chip { background: var(--surface); border: 1px solid var(--border); padding: 8px 16px; border-radius: 100px; font-size: 0.85rem; font-weight: 700; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+        .chip:hover { border-color: var(--accent); background: rgba(59, 130, 246, 0.1); }
+
+        .card { background: var(--surface); padding: 25px; border-radius: 24px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: var(--surface); padding: 6px; border-radius: 16px; border: 1px solid var(--border); width: fit-content; }
+        .tab { padding: 10px 24px; border-radius: 12px; border: none; background: transparent; color: var(--text-dim); cursor: pointer; font-weight: 700; font-size: 0.9rem; }
+        .tab.active { background: var(--accent); color: white; }
+
+        /* Inputs with Red Cross */
+        .input-wrapper { position: relative; display: flex; align-items: center; width: 100%; }
+        .input-wrapper input { width: 100%; padding-right: 35px; }
+        .clear-btn { position: absolute; right: 12px; color: var(--danger); font-size: 1.2rem; cursor: pointer; font-weight: 800; display: none; user-select: none; }
+        .input-wrapper input:not(:placeholder-shown) + .clear-btn { display: block; }
+
+        .entry-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; }
+        input { background: var(--bg); color: var(--text-main); border: 1px solid var(--border); padding: 14px; border-radius: 14px; outline: none; font-family: inherit; font-weight: 600; }
+        input:focus { border-color: var(--accent); }
+        .btn-add { background: var(--accent); color: white; border: none; border-radius: 14px; font-weight: 800; cursor: pointer; letter-spacing: 0.5px; }
+
+        /* Graph Navigation */
+        .graph-nav { display: flex; justify-content: center; gap: 15px; margin-top: 15px; }
+        .nav-btn { background: var(--bg); border: 1px solid var(--border); color: var(--text-main); padding: 8px 16px; border-radius: 10px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* Activity List */
+        .list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+        .item { background: var(--surface); padding: 18px; border-radius: 20px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; border-left: 5px solid var(--accent); }
+        
+        .action-btns { margin-top: 10px; display: flex; gap: 8px; }
+        .badge { font-size: 0.65rem; padding: 4px 10px; border-radius: 8px; cursor: pointer; font-weight: 800; text-transform: uppercase; border: 1px solid transparent; }
+        .edit-badge { background: rgba(59, 130, 246, 0.1); color: var(--accent); }
+        .del-badge { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+
+        /* Switch UI */
+        .switch { position: relative; width: 48px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; inset: 0; background: #2d3139; border-radius: 34px; border: 1px solid var(--border); }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 2px; bottom: 2px; background: white; border-radius: 50%; transition: 0.3s; }
+        input:checked + .slider { background: var(--success); border-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(24px); }
+
+        /* Modal System */
+        .modal-overlay { position: fixed; inset: 0; background: var(--modal-bg); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; animation: fadeIn 0.2s ease; }
+        .modal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 28px; width: 100%; max-width: 400px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); transform: scale(0.9); animation: modalIn 0.3s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes modalIn { to { transform: scale(1); } }
+
+        /* Stats Styles */
+        .stats-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .stat-header { font-weight: 800; color: var(--text-dim); margin-bottom: 15px; font-size: 0.75rem; letter-spacing: 1px; display: flex; justify-content: space-between; }
+        .summary-box { background: var(--surface); padding: 16px; border-radius: 18px; margin-bottom: 12px; border: 1px solid var(--border); }
+        .summary-info { display: flex; justify-content: space-between; margin-bottom: 8px; font-weight: 700; font-size: 0.95rem; }
+        .progress-bar { height: 6px; background: var(--bg); border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--success); border-radius: 10px; }
+
+        @media (max-width: 768px) { 
+            .stats-grid { grid-template-columns: 1fr; } 
+            .entry-grid { grid-template-columns: 1fr; } 
+        }
+    </style>
+</head>
+<body>
+
+<div id="editModal" class="modal-overlay">
+    <div class="modal-card">
+        <h2 style="font-weight: 800; font-size: 1.3rem; margin-bottom: 10px;">Edit Activity</h2>
+        <p style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 20px;">Update the name and goal for this month.</p>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div class="input-wrapper">
+                <input type="text" id="editName" placeholder="Enter activity name here...">
+                <span class="clear-btn" onclick="document.getElementById('editName').value=''">×</span>
+            </div>
+            <div class="input-wrapper">
+                <input type="number" id="editTarget" placeholder="Enter number of days here...">
+                <span class="clear-btn" onclick="document.getElementById('editTarget').value=''">×</span>
+            </div>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 25px;">
+            <button class="m-btn m-btn-cancel" style="flex:1; padding:14px; border-radius:12px; border:none; cursor:pointer; font-weight:800; background:var(--bg); color:var(--text-main); border: 1px solid var(--border);" onclick="closeModals()">Cancel</button>
+            <button class="m-btn m-btn-confirm" style="flex:1; padding:14px; border-radius:12px; border:none; cursor:pointer; font-weight:800; background:var(--accent); color:white;" id="saveEditBtn">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<div id="deleteModal" class="modal-overlay">
+    <div class="modal-card">
+        <h2 style="font-weight: 800; font-size: 1.3rem; margin-bottom: 10px; color: var(--danger);">Delete Activity?</h2>
+        <p style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 20px;">This will permanently remove the activity and all logged history. This cannot be undone.</p>
+        <div style="display: flex; gap: 10px; margin-top: 25px;">
+            <button class="m-btn m-btn-cancel" style="flex:1; padding:14px; border-radius:12px; border:none; cursor:pointer; font-weight:800; background:var(--bg); color:var(--text-main); border: 1px solid var(--border);" onclick="closeModals()">Cancel</button>
+            <button class="m-btn m-btn-danger" style="flex:1; padding:14px; border-radius:12px; border:none; cursor:pointer; font-weight:800; background:var(--danger); color:white;" id="confirmDelBtn">Confirm Delete</button>
+        </div>
+    </div>
+</div>
+
+<nav class="top-nav">
+    <div class="logo">Gatividhi Tracker <span>by Toolify</span></div>
+    <div>
+        <div id="liveTime">00:00:00 PM</div>
+        <div id="liveDate">LOADING...</div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="tabs">
+        <button class="tab active" id="tab-track" onclick="switchView('track')">Tracking</button>
+        <button class="tab" id="tab-stats" onclick="switchView('stats')">Analytics</button>
+        <button onclick="toggleTheme()" style="background:none; border:none; cursor:pointer; margin-left:15px; font-size: 1.2rem;">🌓</button>
+    </div>
+
+    <div id="trackView">
+        <div class="suggestion-label">Quick Add <span>Scroll for more →</span></div>
+        <div class="suggestion-row" id="chips">
+            <div class="chip" onclick="quickAdd('Math Practice 📚')">Math Practice 📚</div>
+            <div class="chip" onclick="quickAdd('Current Affairs 📰')">Current Affairs 📰</div>
+            <div class="chip" onclick="quickAdd('Swimming 🏊')">Swimming 🏊</div>
+            <div class="chip" onclick="quickAdd('Gym Workout 🏋️')">Gym Workout 🏋️</div>
+            <div class="chip" onclick="quickAdd('Cycling 🚴')">Cycling 🚴</div>
+            <div class="chip" onclick="quickAdd('Running 🏃')">Running 🏃</div>
+            <div class="chip" onclick="quickAdd('Reading 📖')">Reading 📖</div>
+            <div class="chip" onclick="quickAdd('Coding 💻')">Coding 💻</div>
+        </div>
+
+        <div class="cal-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="font-weight: 800; font-size: 1.1rem;">Daily Check-ins</h3>
+            <input type="date" id="calInput" class="custom-date" style="background: var(--surface); color: var(--accent); border: 1px solid var(--border); padding: 10px 15px; border-radius: 12px; font-weight: 800; cursor: pointer;" onchange="refreshUI()">
+        </div>
+
+        <div class="card">
+            <div class="entry-grid">
+                <div class="input-wrapper">
+                    <input type="text" id="tName" placeholder="Enter activity name here...">
+                    <span class="clear-btn" onclick="document.getElementById('tName').value=''">×</span>
+                </div>
+                <div class="input-wrapper">
+                    <input type="number" id="tTarget" placeholder="Enter number of days here...">
+                    <span class="clear-btn" onclick="document.getElementById('tTarget').value=''">×</span>
+                </div>
+                <button class="btn-add" onclick="addTask()">ADD</button>
+            </div>
+        </div>
+
+        <div class="list-grid" id="taskList"></div>
+    </div>
+
+    <div id="statsView" style="display: none;">
+        <div class="stats-grid">
+            <div class="card">
+                <div class="stat-header">7-DAY ACTIVITY TREND <span id="rangeLabel"></span></div>
+                <div style="height: 250px; position: relative;"><canvas id="lineChart"></canvas></div>
+                <div class="graph-nav">
+                    <button class="nav-btn" onclick="changeGraphRange(-1)">← Earlier</button>
+                    <button class="nav-btn" onclick="changeGraphRange(1)">Later →</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="stat-header">TODAY'S COMPLETION</div>
+                <div style="height: 250px; position: relative;"><canvas id="pieChart"></canvas></div>
+            </div>
+        </div>
+        <div id="monthList"></div>
+    </div>
+</div>
+
+<script>
+    let db = JSON.parse(localStorage.getItem('toolify_gatividhi_v10')) || { tasks: [], logs: {}, theme: 'dark' };
+    let offsetDays = 0, lChart = null, pChart = null;
+
+    window.onload = () => {
+        document.body.setAttribute('data-theme', db.theme || 'dark');
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('calInput').value = today;
+        startClock(); refreshUI();
+    };
+
+    function startClock() {
+        const update = () => {
+            const now = new Date();
+            document.getElementById('liveTime').innerText = now.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('liveDate').innerText = now.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'short' });
+        };
+        update(); setInterval(update, 1000);
+    }
+
+    function switchView(v) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-' + v).classList.add('active');
+        document.getElementById('trackView').style.display = (v === 'track') ? 'block' : 'none';
+        document.getElementById('statsView').style.display = (v === 'stats') ? 'block' : 'none';
+        if(v === 'stats') renderStats();
+    }
+
+    function addTask() {
+        const name = document.getElementById('tName').value.trim();
+        const target = parseInt(document.getElementById('tTarget').value);
+        const date = document.getElementById('calInput').value;
+        if(!name) return;
+        db.tasks.push({ id: Date.now(), name, target: target || 30, month: date.substring(0, 7) });
+        document.getElementById('tName').value = ''; document.getElementById('tTarget').value = '';
+        save(); refreshUI();
+    }
+
+    function quickAdd(name) {
+        document.getElementById('tName').value = name;
+        document.getElementById('tTarget').focus();
+    }
+
+    function openEditModal(id) {
+        const task = db.tasks.find(t => t.id === id);
+        document.getElementById('editName').value = task.name;
+        document.getElementById('editTarget').value = task.target;
+        document.getElementById('editModal').style.display = 'flex';
+        document.getElementById('saveEditBtn').onclick = () => {
+            task.name = document.getElementById('editName').value;
+            task.target = parseInt(document.getElementById('editTarget').value);
+            save(); refreshUI(); closeModals();
+        };
+    }
+
+    function openDeleteModal(id) {
+        document.getElementById('deleteModal').style.display = 'flex';
+        document.getElementById('confirmDelBtn').onclick = () => {
+            db.tasks = db.tasks.filter(t => t.id !== id);
+            save(); refreshUI(); closeModals();
+        };
+    }
+
+    function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
+
+    function toggleTask(id) {
+        const date = document.getElementById('calInput').value;
+        if(!db.logs[date]) db.logs[date] = {};
+        db.logs[date][id] = !db.logs[date][id];
+        save(); refreshUI();
+    }
+
+    function refreshUI() {
+        const date = document.getElementById('calInput').value;
+        const month = date.substring(0, 7);
+        const list = document.getElementById('taskList');
+        list.innerHTML = '';
+        const currentTasks = db.tasks.filter(t => t.month === month);
+        currentTasks.forEach(t => {
+            const isChecked = db.logs[date] && db.logs[date][t.id];
+            const div = document.createElement('div');
+            div.className = 'item';
+            div.innerHTML = `<div><div style="font-weight:800">${t.name}</div><div class="action-btns"><span class="badge edit-badge" onclick="openEditModal(${t.id})">Edit</span><span class="badge del-badge" onclick="openDeleteModal(${t.id})">Delete</span></div></div><label class="switch"><input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleTask(${t.id})"><span class="slider"></span></label>`;
+            list.appendChild(div);
+        });
+    }
+
+    function renderStats() {
+        const date = document.getElementById('calInput').value, month = date.substring(0, 7);
+        const tasks = db.tasks.filter(t => t.month === month);
+        const list = document.getElementById('monthList');
+        list.innerHTML = `<h3 style="font-size:0.75rem; color:var(--text-dim); margin-top:20px; text-transform:uppercase; font-weight:800;">Monthly Progress</h3>`;
+        tasks.forEach(t => {
+            let done = 0;
+            Object.keys(db.logs).forEach(d => { if(d.startsWith(month) && db.logs[d][t.id]) done++; });
+            const percent = Math.min(100, (done / t.target) * 100);
+            list.innerHTML += `<div class="summary-box"><div class="summary-info"><span>${t.name}</span><span>${done}/${t.target}</span></div><div class="progress-bar"><div class="progress-fill" style="width: ${percent}%"></div></div></div>`;
+        });
+        drawCharts(date, tasks);
+    }
+
+    function changeGraphRange(dir) { offsetDays += (dir * 7); renderStats(); }
+
+    function drawCharts(selDate, tasks) {
+        const isDark = document.body.getAttribute('data-theme') === 'dark';
+        const textCol = isDark ? '#94a3b8' : '#64748b';
+        if(lChart) lChart.destroy(); if(pChart) pChart.destroy();
+
+        const labels = [], data = [];
+        const baseDate = new Date(selDate); baseDate.setDate(baseDate.getDate() + offsetDays - 6);
+        for(let i=0; i<7; i++) {
+            const d = new Date(baseDate); d.setDate(baseDate.getDate() + i);
+            const ds = d.toISOString().split('T')[0];
+            labels.push(d.getDate() + "/" + (d.getMonth() + 1));
+            data.push(Object.values(db.logs[ds] || {}).filter(v => v === true).length);
+        }
+        document.getElementById('rangeLabel').innerText = `(${labels[0]} - ${labels[6]})`;
+
+        lChart = new Chart(document.getElementById('lineChart'), { type: 'line', data: { labels, datasets: [{ data, borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.1)' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { color: textCol, stepSize: 1 } }, x: { ticks: { color: textCol } } } } });
+        
+        const logsToday = db.logs[selDate] || {};
+        const done = tasks.filter(t => logsToday[t.id]).length, total = tasks.length || 1;
+        pChart = new Chart(document.getElementById('pieChart'), { type: 'doughnut', data: { labels: ['Done', 'Left'], datasets: [{ data: [done, Math.max(0, total-done)], backgroundColor: ['#10b981', isDark ? '#26292f' : '#e2e8f0'], borderWidth: 0 }] }, options: { cutout: '80%', maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: textCol } } } } });
+    }
+
+    function toggleTheme() { db.theme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; document.body.setAttribute('data-theme', db.theme); save(); }
+    function save() { localStorage.setItem('toolify_gatividhi_v10', JSON.stringify(db)); }
+</script>
+</body>
+</html>
