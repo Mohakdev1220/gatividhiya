@@ -198,9 +198,34 @@ body {
     border-left: 1px solid var(--border);
 }
 
-/* Responsiveness: Mobile par logo ya time ke upar na chadh jaye */
-@media (max-width: 600px) {
-    .logo { font-size: 0.9rem; }
-    #liveTime { font-size: 0.9rem; }
-    #login-btn { font-size: 0.7rem; padding: 6px 12px; }
+/* Tablet aur Mobile ke liye special alignment Fix */
+@media (max-width: 768px) {
+    .top-nav {
+        flex-direction: column !important;
+        height: auto !important;
+        padding: 15px !important;
+        gap: 12px !important;
+        position: relative !important;
+    }
+
+    #auth-ui, #user-info {
+        position: static !important;
+        transform: none !important;
+        margin: 5px 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+        order: 2 !important;
+    }
+
+    .logo { 
+        order: 1 !important; 
+        text-align: center !important;
+    }
+
+    /* Time aur Date wala div */
+    .top-nav > div:last-child {
+        order: 3 !important;
+        text-align: center !important;
+        width: 100% !important;
+    }
 }
