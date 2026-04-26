@@ -28,23 +28,48 @@ window.onload = () => {
     refreshUI();
 };
 
-// --- AUTH LOGIC ---
-const loginBtn = document.getElementById('login-btn');
-const logoutBtn = document.getElementById('logout-btn');
-const userInfo = document.getElementById('user-info');
+// --- FINAL AUTH LOGIC ---
 
-if(loginBtn) loginBtn.onclick = () => auth.signInWithPopup(provider);
-if(logoutBtn) logoutBtn.onclick = () => auth.signOut();
+// 1. Login Function (Isse pata chalega agar popup block ho raha hai)
+window.handleLogin = function() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider)
+        .then((result) => {
+            console.log("Logged in:", result.user.displayName);
+        })
+        .catch((error) => {
+            console.error("Auth Error:", error.message);
+            if (error.code === 'auth/popup-blocked') {
+                alert("Popup block ho gaya hai! Browser ki settings mein ise allow karein.");
+            } else {
+                alert("Login nahi ho paya: " + error.message);
+            }
+        });
+};
 
+// 2. Logout Function
+window.handleLogout = function() {
+    auth.signOut();
+};
+
+// 3. Auth Observer (UI Update aur Data Sync)
 auth.onAuthStateChanged(async (user) => {
+    const loginBtn = document.getElementById('login-btn');
+    const userInfo = document.getElementById('user-info');
+
     if (user) {
+        // User login hai
         if(loginBtn) loginBtn.style.display = 'none';
         if(userInfo) {
             userInfo.style.display = 'flex';
             document.getElementById('user-name').innerText = user.displayName;
             document.getElementById('user-pic').src = user.photoURL;
         }
-        
+
+        // Logout button par function bind karein
+        const logoutBtn = document.getElementById('logout-btn');
+        if(logoutBtn) logoutBtn.onclick = window.handleLogout;
+
         // Cloud se data load karo
         try {
             const docSnap = await db_cloud.collection("users").doc(user.uid).get();
@@ -52,12 +77,20 @@ auth.onAuthStateChanged(async (user) => {
                 db = docSnap.data().gatividhi_data;
                 refreshUI();
             } else {
-                save(); // Naya cloud user hai to local upload kar do
+                save(); // Naya user hai to local data upload kar do
             }
         } catch(e) { console.error("Cloud Load Error", e); }
+        
     } else {
-        if(loginBtn) loginBtn.style.display = 'block';
+        // User logged out hai
+        if(loginBtn) {
+            loginBtn.style.display = 'block';
+            loginBtn.onclick = window.handleLogin; // Button click par login trigger
+        }
         if(userInfo) userInfo.style.display = 'none';
+        
+        // Local data dikhao
+        db = JSON.parse(localStorage.getItem('toolify_gatividhi_v10')) || { tasks: [], logs: {}, theme: 'dark' };
         refreshUI();
     }
 });
