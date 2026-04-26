@@ -125,3 +125,82 @@
 body {
     padding-bottom: 0 !important; 
 }
+/* --- Authentication UI (Top Center) --- */
+
+/* 1. Login Button Style */
+#login-btn {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 100px; /* Capsule shape */
+    font-weight: 800;
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    white-space: nowrap;
+    z-index: 1001;
+}
+
+#login-btn:hover {
+    filter: brightness(1.1);
+    transform: translate(-50%, -55%); /* Chota sa hover effect */
+}
+
+/* 2. Logged-in User Info (Center) */
+#user-info {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: none; /* JS handle karega display:flex */
+    align-items: center;
+    gap: 10px;
+    background: var(--bg);
+    padding: 4px 12px;
+    border-radius: 50px;
+    border: 1px solid var(--border);
+    z-index: 1001;
+}
+
+#user-pic {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
+}
+
+#user-name {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-main);
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#logout-btn {
+    background: transparent;
+    border: none;
+    color: var(--danger);
+    font-weight: 800;
+    font-size: 0.65rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    padding-left: 5px;
+    border-left: 1px solid var(--border);
+}
+
+/* Responsiveness: Mobile par logo ya time ke upar na chadh jaye */
+@media (max-width: 600px) {
+    .logo { font-size: 0.9rem; }
+    #liveTime { font-size: 0.9rem; }
+    #login-btn { font-size: 0.7rem; padding: 6px 12px; }
+}
