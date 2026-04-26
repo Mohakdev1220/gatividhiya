@@ -125,7 +125,13 @@
         <a href="https://www.youtube.com/@MOHAKCHOUBEY" class="f-link" style="color:#ff0000;">YouTube</a>
     </div>
 </footer>
-
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/gatividhiya/service-worker.js");
+    });
+  }
+</script>
 
 
 
