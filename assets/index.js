@@ -124,4 +124,68 @@
     }
 
     function toggleTheme() { db.theme = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; document.body.setAttribute('data-theme', db.theme); save(); }
-    function save() { localStorage.setItem('toolify_gatividhi_v10', JSON.stringify(db)); }
+    function save() { localStorage.setItem('toolify_gatividhi_v10', JSON.stringify(db)); } 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-auth.js";
+
+// आपकी Firebase Config
+const firebaseConfig = {
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCfOzZdWyPJE4A_Vz_5h1ElS0_m_EXTenw",
+  authDomain: "gatividhiya.firebaseapp.com",
+  databaseURL: "https://gatividhiya-default-rtdb.firebaseio.com",
+  projectId: "gatividhiya",
+  storageBucket: "gatividhiya.firebasestorage.app",
+  messagingSenderId: "305825266364",
+  appId: "1:305825266364:web:b4e7b0921644f88b632eb9",
+
+};
+
+// Initialize
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+// UI Elements
+const loginBtn = document.getElementById('login-btn');
+const logoutBtn = document.getElementById('logout-btn');
+const userInfo = document.getElementById('user-info');
+const userName = document.getElementById('user-name');
+const userPic = document.getElementById('user-pic');
+
+// --- Functions ---
+
+// 1. Sign In function
+loginBtn.onclick = async () => {
+    try {
+        await signInWithPopup(auth, provider);
+        console.log("Logged in successfully!");
+    } catch (error) {
+        console.error("Login Error:", error.message);
+    }
+};
+
+// 2. Sign Out function
+logoutBtn.onclick = () => signOut(auth);
+
+// 3. Monitor Auth State (Ye apne aap pata kar lega user logged in hai ya nahi)
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // User login hai
+        loginBtn.style.display = 'none';
+        userInfo.style.display = 'flex';
+        userName.innerText = user.displayName;
+        userPic.src = user.photoURL;
+        
+        console.log("Welcome,", user.displayName);
+        // यहाँ से आप Cloud (Firestore) से डेटा लोड करने का फंक्शन कॉल कर सकते हैं
+    } else {
+        // User logged out hai
+        loginBtn.style.display = 'block';
+        userInfo.style.display = 'none';
+        
+        console.log("User is signed out (Local Mode)");
+        // यहाँ आप LocalStorage वाला डेटा दिखा सकते हैं
+    }
+});
