@@ -107,14 +107,22 @@ window.startClock = function() {
     update(); setInterval(update, 1000);
 }
 
-window.save = function() {
+async function save() {
+    // 1. Local storage mein save karein (taaki offline bhi chale)
     localStorage.setItem('toolify_gatividhi_v10', JSON.stringify(db));
+
+    // 2. Cloud par sync karein agar user logged in hai
     const user = auth.currentUser;
     if (user) {
-        db_cloud.collection("users").doc(user.uid).set({
-            gatividhi_data: db,
-            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        try {
+            await db_cloud.collection("users").doc(user.uid).set({
+                gatividhi_data: db,
+                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            console.log("Cloud sync successful!");
+        } catch (e) {
+            console.error("Cloud sync failed:", e);
+        }
     }
 }
 
