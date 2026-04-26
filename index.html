@@ -17,7 +17,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 
 <!-- Styles -->
-<link rel="stylesheet" href="assets/index.css">
+<link rel="stylesheet" href="assets/index.css"> 
+    </script>
+         <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
 
 <!-- App Script -->
 <script src="assets/index.js" defer></script>
@@ -61,20 +65,24 @@
 <nav class="top-nav">
     <div class="logo">Gatividhi Tracker <span>by Toolify</span></div>
     
-    <div id="auth-ui">
-        <button id="login-btn">Sign in with Google</button>
-        
-        <div id="user-info" style="display: none;">
-            <img id="user-pic" src="" alt="User">
-            <span id="user-name"></span> 
-            <button id="logout-btn">Sign Out</button>
-        </div>
+  <div id="auth-ui">
+    <button type="button" id="login-btn" onclick="handleLogin()">
+        Sign in with Google
+    </button>
+    
+    <div id="user-info" style="display: none;">
+        <img id="user-pic" src="" alt="User Profile">
+        <span id="user-name"></span> 
+        <button type="button" id="logout-btn" onclick="handleLogout()">
+            Sign Out
+        </button>
     </div>
+</div>
 
-    <div style="text-align: right;">
-        <div id="liveTime">00:00:00 PM</div>
-        <div id="liveDate">LOADING...</div>
-    </div>  
+ <div class="time-box">
+    <div id="liveTime">00:00:00 PM</div>
+    <div id="liveDate">LOADING...</div>
+</div>
 </nav>
 
 <div class="container">
@@ -160,11 +168,8 @@ if ("serviceWorker" in navigator) {
     }
   });
 }
-</script>
-         <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
-<script src="assets/index.js"></script>
+
+
 
 </body>
 </html>
