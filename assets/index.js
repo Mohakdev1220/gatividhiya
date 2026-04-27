@@ -223,9 +223,12 @@ window.addTask = function (name) {
 
 /* ---------- 13) TOGGLE TASK ---------- */
 window.toggleTask = function (id) {
-    if (!state.logs) state.logs = {};
+    const today = new Date().toISOString().slice(0, 10);
 
-    state.logs[id] = !state.logs[id];
+    if (!state.logs) state.logs = {};
+    if (!state.logs[today]) state.logs[today] = {};
+
+    state.logs[today][id] = !state.logs[today][id];
 
     state.meta.updatedAt = now();
 
@@ -233,7 +236,27 @@ window.toggleTask = function (id) {
     syncToCloud("toggle-task");
 };
 
-/* ---------- 14) INIT ---------- */
+
+window.switchView = function(view) {
+    console.log("Switching view:", view);
+    // simple placeholder (baad me full logic daal)
+};
+
+window.toggleTheme = function() {
+    console.log("Theme toggled");
+    // optional: state.theme = ...
+};
+
+function startClock() {
+    setInterval(() => {
+        const el = document.getElementById("time");
+        if (!el) return;
+
+        el.textContent = new Date().toLocaleTimeString();
+    }, 1000);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     console.log("🚀 App Ready");
+    startClock();
 });
