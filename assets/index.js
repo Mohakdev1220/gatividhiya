@@ -39,7 +39,13 @@ let authReadyResolved = false;
 const authReady = new Promise((resolve) => {
     authReadyResolve = resolve;
 });
-
+// Auth ready fallback (VERY IMPORTANT)
+setTimeout(() => {
+    if (!authReadyResolved) {
+        authReadyResolved = true;
+        authReadyResolve();
+    }
+}, 2000);
 /* ---------- 4) Local State ---------- */
 const STORAGE_KEY = "gatividhi_v1";
 
@@ -112,6 +118,7 @@ async function loadFromCloud(user) {
                     ...cloud
                 };
                 saveLocal();
+               renderTasks();
             }
 
             console.log("☁️ Loaded from cloud");
@@ -122,7 +129,7 @@ async function loadFromCloud(user) {
     } catch (e) {
         console.error("Load error:", e);
     }
-}
+};
 
 /* ---------- 8) REALTIME SYNC ---------- */
 let unsubscribe = null;
@@ -147,8 +154,9 @@ function listenToCloud(user) {
             };
 
             saveLocal();
+           renderTasks();
             console.log("🔄 Synced from cloud");
-        });
+    });
 }
 
 /* ---------- 9) AUTH ---------- */
@@ -179,7 +187,7 @@ auth.onAuthStateChanged(async (user) => {
             unsubscribe = null;
         }
     }
-});
+};
 
 /* ---------- 10) LOGIN ---------- */
 window.handleLogin = async function () {
@@ -218,6 +226,7 @@ window.addTask = function (name) {
     state.meta.updatedAt = now();
 
     saveLocal();
+   renderTasks(); 
     syncToCloud("add-task");
 };
 
@@ -233,6 +242,7 @@ window.toggleTask = function (id) {
     state.meta.updatedAt = now();
 
     saveLocal();
+   renderTasks(); 
     syncToCloud("toggle-task");
 };
 
@@ -256,7 +266,33 @@ function startClock() {
     }, 1000);
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+function renderTasks() {
+    const list = document.getElementById("taskList");
+    if (!list) return;
+
+    list.innerHTML = "";
+
+    const today = new Date().toISOString().slice(0, 10);
+
+    state.tasks.forEach(task => {
+        const checked = state.logs?.[today]?.[task.id];
+
+        const div = document.createElement("div");
+        div.innerHTML = `
+            <label>
+                <input type="checkbox"
+                    ${checked ? "checked" : ""}
+                    onchange="toggleTask(${task.id})">
+                ${task.name}
+            </label>
+        `;
+
+        list.appendChild(div);
+    });
+}
+
+                        document.addEventListener("DOMContentLoaded", () => {
     console.log("🚀 App Ready");
     startClock();
+    renderTasks(); // 🔥 VERY IMPORTANT
 });
