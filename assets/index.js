@@ -187,7 +187,7 @@ auth.onAuthStateChanged(async (user) => {
             unsubscribe = null;
         }
     }
-};
+});
 
 /* ---------- 10) LOGIN ---------- */
 window.handleLogin = async function () {
