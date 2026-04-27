@@ -296,6 +296,21 @@ function renderTasks() {
         list.appendChild(div);
     });
 }
+window.quickAdd = function(name) {
+    if (!name) return;
+
+    state.tasks.push({
+        id: now(),
+        name
+    });
+
+    state.meta.updatedAt = now();
+
+    saveLocal();
+    renderTasks();
+    syncToCloud("quick-add");
+};
+}
 
                         document.addEventListener("DOMContentLoaded", () => {
     console.log("🚀 App Ready");
