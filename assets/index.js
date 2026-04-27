@@ -215,7 +215,8 @@ window.handleLogout = async function () {
 };
 
 /* ---------- 12) ADD TASK ---------- */
-window.addTask = function (name) {
+window.addTask = function () {
+    const name = document.getElementById("tName").value;
     if (!name) return alert("Enter name");
 
     state.tasks.push({
@@ -259,13 +260,18 @@ window.toggleTheme = function() {
 
 function startClock() {
     setInterval(() => {
-        const el = document.getElementById("time");
-        if (!el) return;
+        const timeEl = document.getElementById("liveTime");
+        const dateEl = document.getElementById("liveDate");
 
-        el.textContent = new Date().toLocaleTimeString();
+        if (!timeEl || !dateEl) return;
+
+        const now = new Date();
+
+        timeEl.textContent = now.toLocaleTimeString();
+        dateEl.textContent = now.toDateString();
+
     }, 1000);
 }
-
 function renderTasks() {
     const list = document.getElementById("taskList");
     if (!list) return;
