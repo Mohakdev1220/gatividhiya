@@ -54,9 +54,7 @@ function normalizeState(input) {
     base.logs = source.logs && typeof source.logs === "object" ? source.logs : {};
     base.graphOffset = Number.isFinite(Number(source.graphOffset)) ? Number(source.graphOffset) : 0;
     base.meta = source.meta && typeof source.meta === "object"
-        ? {
-            updatedAt: Number(source.meta.updatedAt || 0)
-        }
+        ? { updatedAt: Number(source.meta.updatedAt || 0) }
         : { updatedAt: 0 };
 
     return base;
@@ -663,28 +661,38 @@ function renderStats() {
         }
     });
 
-    const dateKey = document.getElementById("calInput")?.value || todayKey();
-    const month = monthKeyFromDateKey(dateKey);
-    const monthTasks = getTasksForMonth(month);
-    const doneCount = monthTasks.filter(task => Boolean(state.logs?.[dateKey]?.[task.id])).length;
-    const pendingCount = Math.max(0, monthTasks.length - doneCount);
+const dateKey = document.getElementById("calInput")?.value || todayKey();
+const month = monthKeyFromDateKey(dateKey);
+const monthTasks = getTasksForMonth(month);
 
-    pieChart = new Chart(canvasPie.getContext("2d"), {
-        type: "doughnut",
-        data: {
-            labels: ["Done", "Pending"],
-            datasets: [{ data: [doneCount, pendingCount] }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: "68%",
-            plugins: {
-                legend: { position: "bottom" }
-            }
+const dayLogs = state.logs?.[dateKey] || {};
+
+const availableTasks = monthTasks.filter(task => task.month === month);
+
+const doneCount = availableTasks.filter(
+    task => dayLogs[task.id] === true
+).length;
+
+const pendingCount = Math.max(
+    0,
+    availableTasks.length - doneCount
+);
+
+pieChart = new Chart(canvasPie.getContext("2d"), {
+    type: "doughnut",
+    data: {
+        labels: ["Done", "Pending"],
+        datasets: [{ data: [doneCount, pendingCount] }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: "68%",
+        plugins: {
+            legend: { position: "bottom" }
         }
-    });
-
+    }
+});
     if (monthList) {
         const months = [...new Set(state.tasks.map(t => t.month))].sort().reverse();
 
@@ -695,24 +703,29 @@ function renderStats() {
                     ${monthTasks.length} activities in the selected month.
                 </div>
             </div>
-            ${months.map((m) => {
-                const tasks = getTasksForMonth(m);
-                const completed = tasks.reduce((sum, task) => sum + countTaskChecksInMonth(task.id, m), 0);
-                const target = tasks.reduce((sum, task) => sum + Number(task.target || 0), 0);
-
-                return `
-                    <div class="card" style="margin-top:15px;">
-                        <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:center;">
-                            <div>
-                                <div style="font-weight:800; font-size:1rem;">${escapeHtml(m)}</div>
-                                <div style="color:var(--text-dim); font-size:0.85rem;">${tasks.length} activities</div>
-                            </div>
-                            <div style="font-weight:800; color:var(--accent);">${completed}/${target}</div>
-                        </div>
-                    </div>
-                `;
-            }).join("")}
         `;
+
+        months.forEach((m) => {
+            const tasks = getTasksForMonth(m);
+            const completed = tasks.reduce((sum, task) => sum + countTaskChecksInMonth(task.id, m), 0);
+            const target = tasks.reduce((sum, task) => sum + Number(task.target || 0), 0);
+
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "month-summary-card";
+            button.innerHTML = `
+                <div class="month-summary-top">
+                    <div>
+                        <div class="month-summary-name">${escapeHtml(m)}</div>
+                        <div class="month-summary-sub">${tasks.length} activities</div>
+                    </div>
+                    <div class="month-summary-score">${completed}/${target}</div>
+                </div>
+            `;
+
+            button.addEventListener("click", () => showMonthDetails(m));
+            monthList.appendChild(button);
+        });
     }
 }
 
@@ -721,7 +734,88 @@ window.refreshUI = function () {
     if (isStatsVisible()) renderStats();
 };
 
-/* ---------- 11) Init ---------- */
+/* ---------- 11) Month Details Modal ---------- */
+function getMonthTasks(monthKey) {
+    return state.tasks.filter(task => task.month === monthKey);
+}
+
+function getTaskCompletedCountInMonth(taskId, monthKey) {
+    let total = 0;
+
+    Object.keys(state.logs || {}).forEach((dateKey) => {
+        if (!dateKey.startsWith(monthKey)) return;
+        if (state.logs[dateKey]?.[taskId]) total += 1;
+    });
+
+    return total;
+}
+
+window.showMonthDetails = function (monthKey) {
+    const modal = document.getElementById("monthDetailModal");
+    const title = document.getElementById("monthModalTitle");
+    const content = document.getElementById("monthModalContent");
+
+    if (!modal || !title || !content) return;
+
+    const tasks = getMonthTasks(monthKey);
+
+    title.textContent = monthKey;
+    content.innerHTML = "";
+
+    if (tasks.length === 0) {
+        content.innerHTML = `
+            <div class="month-activity-card" style="text-align:center; color:var(--text-dim);">
+                No activities in this month.
+            </div>
+        `;
+        modal.classList.add("show");
+        modal.setAttribute("aria-hidden", "false");
+        return;
+    }
+
+    tasks.forEach((task) => {
+        const completed = getTaskCompletedCountInMonth(task.id, monthKey);
+        const target = Number.isFinite(Number(task.target)) && Number(task.target) > 0
+            ? Math.floor(Number(task.target))
+            : 0;
+
+        const progress = target > 0
+            ? Math.min(100, Math.round((completed / target) * 100))
+            : 0;
+
+        const card = document.createElement("div");
+        card.className = "month-activity-card";
+        card.innerHTML = `
+            <div class="month-activity-name">${escapeHtml(task.name)}</div>
+            <div class="month-activity-meta">
+                ${completed}/${target} days this month
+            </div>
+            <div style="height:6px; background:var(--bg); border-radius:999px; overflow:hidden; margin-top:10px;">
+                <div style="height:100%; width:${progress}%; background:var(--success); border-radius:999px;"></div>
+            </div>
+        `;
+        content.appendChild(card);
+    });
+
+    modal.classList.add("show");
+    modal.setAttribute("aria-hidden", "false");
+};
+
+window.hideMonthModal = function () {
+    const modal = document.getElementById("monthDetailModal");
+    if (!modal) return;
+
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden", "true");
+};
+
+window.closeMonthModal = function (event) {
+    if (event && event.target && event.target.id === "monthDetailModal") {
+        hideMonthModal();
+    }
+};
+
+/* ---------- 12) Modal buttons ---------- */
 function bindModalButtons() {
     const saveEditBtn = document.getElementById("saveEditBtn");
     const confirmDelBtn = document.getElementById("confirmDelBtn");
@@ -753,6 +847,7 @@ function bindModalButtons() {
     }
 }
 
+/* ---------- 13) Init ---------- */
 document.addEventListener("DOMContentLoaded", () => {
     console.log("🚀 App Ready");
     setThemeOnDocument();
