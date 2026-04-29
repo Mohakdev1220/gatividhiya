@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
@@ -78,6 +79,20 @@
             Sign Out
         </button>
     </div>
+</div> 
+  
+  <div id="monthDetailModal" class="modal-overlay" onclick="closeMonthModal(event)" aria-hidden="true">
+  <div class="modal-card month-detail-card" onclick="event.stopPropagation()">
+    <div class="month-detail-head">
+      <div>
+        <div class="month-detail-kicker">Month details</div>
+        <h2 id="monthModalTitle" style="font-weight:800; font-size:1.3rem;">Month</h2>
+      </div>
+      <button type="button" class="month-close" onclick="hideMonthModal()" aria-label="Close">×</button>
+    </div>
+
+    <div id="monthModalContent" class="month-detail-list"></div>
+  </div>
 </div>
 
  <div class="time-box">
