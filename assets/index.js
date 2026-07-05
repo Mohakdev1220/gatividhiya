@@ -856,3 +856,380 @@ document.addEventListener("DOMContentLoaded", () => {
     bindModalButtons();
     renderTasks();
 });
+/* ===============================
+   Gatividhi Tracker — Export / Import
+   ADD THIS CODE at the bottom of assets/index.js
+   (before the last closing comment / DOMContentLoaded call)
+   =============================== */
+
+/* ──────────────────────────────────────────────────────────────
+   EXPORT — JSON
+   ────────────────────────────────────────────────────────────── */
+window.exportJSON = function () {
+    const payload = {
+        exportedAt: new Date().toISOString(),
+        version: 1,
+        data: state
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    triggerDownload(blob, `gatividhi-backup-${todayKey()}.json`);
+    showExportToast("JSON exported ✓");
+};
+
+/* ──────────────────────────────────────────────────────────────
+   EXPORT — TXT
+   ────────────────────────────────────────────────────────────── */
+window.exportTXT = function () {
+    const lines = [];
+    lines.push("╔══════════════════════════════════════╗");
+    lines.push("║     GATIVIDHI TRACKER — EXPORT       ║");
+    lines.push("╚══════════════════════════════════════╝");
+    lines.push(`Exported on : ${new Date().toLocaleString("en-IN")}`);
+    lines.push(`Total tasks : ${state.tasks.length}`);
+    lines.push("");
+
+    const months = [...new Set(state.tasks.map(t => t.month))].sort().reverse();
+
+    months.forEach(month => {
+        const tasks = state.tasks.filter(t => t.month === month);
+        lines.push(`━━━━  ${month}  ━━━━`);
+        tasks.forEach(task => {
+            const done = countTaskChecksInMonth(task.id, month);
+            const pct = task.target > 0 ? Math.round((done / task.target) * 100) : 0;
+            const bar = buildTextBar(pct, 20);
+            lines.push(`  • ${task.name}`);
+            lines.push(`    Progress : [${bar}] ${pct}%  (${done}/${task.target} days)`);
+        });
+        lines.push("");
+    });
+
+    lines.push("── Log History ──────────────────────────");
+    const sortedDates = Object.keys(state.logs || {}).sort().reverse();
+    sortedDates.forEach(date => {
+        const dayLog = state.logs[date];
+        const checkedIds = Object.keys(dayLog).filter(id => dayLog[id]);
+        if (checkedIds.length === 0) return;
+
+        lines.push(`  ${date}`);
+        checkedIds.forEach(id => {
+            const task = state.tasks.find(t => String(t.id) === String(id));
+            lines.push(`    ✓ ${task ? task.name : `(deleted task #${id})`}`);
+        });
+    });
+
+    const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+    triggerDownload(blob, `gatividhi-export-${todayKey()}.txt`);
+    showExportToast("TXT exported ✓");
+};
+
+function buildTextBar(pct, width) {
+    const filled = Math.round((pct / 100) * width);
+    return "█".repeat(filled) + "░".repeat(width - filled);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   EXPORT — PDF  (uses jsPDF loaded via CDN)
+   ────────────────────────────────────────────────────────────── */
+window.exportPDF = function () {
+    if (typeof window.jspdf === "undefined" || typeof window.jspdf.jsPDF === "undefined") {
+        showExportToast("Loading PDF engine…");
+        const s = document.createElement("script");
+        s.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+        s.onload = () => buildAndDownloadPDF();
+        s.onerror = () => showExportToast("PDF load failed — try again");
+        document.head.appendChild(s);
+        return;
+    }
+    buildAndDownloadPDF();
+};
+
+function buildAndDownloadPDF() {
+    if (typeof window.jspdf === "undefined") {
+        showExportToast("PDF engine not ready — try again");
+        return;
+    }
+    const { jsPDF } = window.jspdf;
+
+    const W = doc.internal.pageSize.getWidth();
+    const MARGIN = 18;
+    const COL = W - MARGIN * 2;
+    let y = 20;
+
+    const accent = [59, 130, 246];   // blue
+    const success = [16, 185, 129];  // green
+    const dimGrey = [120, 130, 150];
+    const dark = [20, 24, 32];
+
+    /* header band */
+    doc.setFillColor(...accent);
+    doc.rect(0, 0, W, 28, "F");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.setTextColor(255, 255, 255);
+    doc.text("Gatividhi Tracker", MARGIN, 13);
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.text("by Toolify", MARGIN, 19);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.text(`Exported: ${new Date().toLocaleString("en-IN")}`, W - MARGIN, 22, { align: "right" });
+
+    y = 36;
+
+    /* summary row */
+    const months = [...new Set(state.tasks.map(t => t.month))].sort().reverse();
+    const totalDone = Object.values(state.logs || {}).reduce((acc, day) => {
+        return acc + Object.values(day).filter(Boolean).length;
+    }, 0);
+
+    const boxes = [
+        { label: "Total Tasks", val: state.tasks.length },
+        { label: "Months Active", val: months.length },
+        { label: "Total Check-ins", val: totalDone }
+    ];
+
+    const bw = (COL - 8) / 3;
+    boxes.forEach((box, i) => {
+        const bx = MARGIN + i * (bw + 4);
+        doc.setFillColor(240, 244, 252);
+        doc.roundedRect(bx, y, bw, 18, 3, 3, "F");
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.setTextColor(...accent);
+        doc.text(String(box.val), bx + bw / 2, y + 9, { align: "center" });
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(7);
+        doc.setTextColor(...dimGrey);
+        doc.text(box.label.toUpperCase(), bx + bw / 2, y + 14.5, { align: "center" });
+    });
+
+    y += 26;
+
+    /* monthly breakdown */
+    months.forEach(month => {
+        const tasks = state.tasks.filter(t => t.month === month);
+
+        /* month header */
+        if (y > 260) { doc.addPage(); y = 20; }
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.setTextColor(...accent);
+        doc.text(month, MARGIN, y);
+        doc.setDrawColor(...accent);
+        doc.setLineWidth(0.4);
+        doc.line(MARGIN + 22, y - 1, MARGIN + COL, y - 1);
+        y += 6;
+
+        tasks.forEach(task => {
+            if (y > 270) { doc.addPage(); y = 20; }
+
+            const done = countTaskChecksInMonth(task.id, month);
+            const pct = task.target > 0 ? Math.min(100, Math.round((done / task.target) * 100)) : 0;
+
+            /* task name */
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(9);
+            doc.setTextColor(...dark);
+            doc.text(task.name, MARGIN, y);
+
+            /* score */
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(8);
+            doc.setTextColor(...dimGrey);
+            doc.text(`${done}/${task.target} days  •  ${pct}%`, W - MARGIN, y, { align: "right" });
+            y += 4;
+
+            /* progress bar track */
+            doc.setFillColor(220, 226, 236);
+            doc.roundedRect(MARGIN, y, COL, 3.5, 1.5, 1.5, "F");
+            /* progress bar fill */
+            if (pct > 0) {
+                doc.setFillColor(...success);
+                doc.roundedRect(MARGIN, y, COL * (pct / 100), 3.5, 1.5, 1.5, "F");
+            }
+            y += 8;
+        });
+
+        y += 4;
+    });
+
+    /* log section */
+    if (y > 240) { doc.addPage(); y = 20; }
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(...accent);
+    doc.text("Check-in Log", MARGIN, y);
+    doc.setDrawColor(...accent);
+    doc.line(MARGIN + 28, y - 1, MARGIN + COL, y - 1);
+    y += 7;
+
+    const sortedDates = Object.keys(state.logs || {}).sort().reverse().slice(0, 60);
+    sortedDates.forEach(date => {
+        const dayLog = state.logs[date];
+        const checkedIds = Object.keys(dayLog).filter(id => dayLog[id]);
+        if (checkedIds.length === 0) return;
+
+        if (y > 275) { doc.addPage(); y = 20; }
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8);
+        doc.setTextColor(...dark);
+        doc.text(date, MARGIN, y);
+
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(...dimGrey);
+        const names = checkedIds.map(id => {
+            const t = state.tasks.find(t => String(t.id) === String(id));
+            return t ? t.name : "(deleted)";
+        }).join("  •  ");
+        doc.text(names, MARGIN + 22, y);
+        y += 5.5;
+    });
+
+    /* footer on every page */
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let p = 1; p <= pageCount; p++) {
+        doc.setPage(p);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(7);
+        doc.setTextColor(...dimGrey);
+        doc.text(`Page ${p} of ${pageCount}  —  Gatividhi Tracker by Toolify`, W / 2, 292, { align: "center" });
+    }
+
+    doc.save(`gatividhi-report-${todayKey()}.pdf`);
+    showExportToast("PDF exported ✓");
+}
+
+/* ──────────────────────────────────────────────────────────────
+   IMPORT — JSON
+   ────────────────────────────────────────────────────────────── */
+window.importJSON = function () {
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = ".json,application/json";
+    fileInput.style.display = "none";
+
+    fileInput.onchange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        try {
+            const text = await file.text();
+            const parsed = JSON.parse(text);
+
+            /* support both raw state and wrapped export */
+            const incoming = parsed.data || parsed;
+
+            if (!incoming.tasks || !Array.isArray(incoming.tasks)) {
+                showExportToast("Invalid file — missing tasks ✗", true);
+                return;
+            }
+
+            const normalized = normalizeState(incoming);
+
+            const confirm = window.confirm(
+                `Import ${normalized.tasks.length} tasks and their logs?\n\nThis will MERGE with your current data (existing tasks kept, new ones added).`
+            );
+
+            if (!confirm) return;
+
+            /* MERGE strategy: keep existing tasks, add new ones */
+            const existingIds = new Set(state.tasks.map(t => String(t.id)));
+            const newTasks = normalized.tasks.filter(t => !existingIds.has(String(t.id)));
+            state.tasks = [...state.tasks, ...newTasks];
+
+            /* merge logs */
+            Object.keys(normalized.logs || {}).forEach(date => {
+                if (!state.logs[date]) state.logs[date] = {};
+                Object.assign(state.logs[date], normalized.logs[date]);
+            });
+
+            state.meta.updatedAt = Date.now();
+
+            saveLocal();
+            scheduleSync("import-json");
+            renderTasks();
+            if (isStatsVisible()) renderStats();
+
+            showExportToast(`Imported ${newTasks.length} new tasks ✓`);
+        } catch (err) {
+            console.error("Import error:", err);
+            showExportToast("Parse error — invalid JSON ✗", true);
+        }
+    };
+
+    document.body.appendChild(fileInput);
+    fileInput.click();
+    setTimeout(() => fileInput.remove(), 5000);
+};
+
+/* ──────────────────────────────────────────────────────────────
+   IMPORT — CSV  (exported separately for spreadsheet compat)
+   ────────────────────────────────────────────────────────────── */
+window.exportCSV = function () {
+    const rows = [["Month", "Task Name", "Target Days", "Days Completed", "Progress %", "Created At"]];
+
+    state.tasks.forEach(task => {
+        const done = countTaskChecksInMonth(task.id, task.month);
+        const pct = task.target > 0 ? Math.round((done / task.target) * 100) : 0;
+        rows.push([
+            task.month,
+            `"${task.name.replace(/"/g, '""')}"`,
+            task.target,
+            done,
+            pct,
+            new Date(task.createdAt).toLocaleDateString("en-IN")
+        ]);
+    });
+
+    const csv = rows.map(r => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    triggerDownload(blob, `gatividhi-tasks-${todayKey()}.csv`);
+    showExportToast("CSV exported ✓");
+};
+
+/* ──────────────────────────────────────────────────────────────
+   HELPERS
+   ────────────────────────────────────────────────────────────── */
+function triggerDownload(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+        URL.revokeObjectURL(url);
+        a.remove();
+    }, 1000);
+}
+
+let toastTimer = null;
+function showExportToast(msg, isError = false) {
+    let toast = document.getElementById("exportToast");
+    if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "exportToast";
+        document.body.appendChild(toast);
+    }
+
+    toast.textContent = msg;
+    toast.className = "export-toast" + (isError ? " export-toast-err" : "");
+    toast.classList.add("show");
+
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove("show"), 3000);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   MODAL OPEN/CLOSE
+   ────────────────────────────────────────────────────────────── */
+window.openExportModal = function () {
+    const m = document.getElementById("exportImportModal");
+    if (m) m.classList.add("show");
+};
+
+window.closeExportModal = function () {
+    const m = document.getElementById("exportImportModal");
+    if (m) m.classList.remove("show");
+};
