@@ -1,0 +1,84 @@
+<!-- ═══════════════════════════════════════════════════════════
+     STEP 1 — Add this button in the .tabs div, after the theme toggle button
+     Replace:
+         <button onclick="toggleTheme()" ...>🌓</button>
+     With both the theme toggle AND this export button:
+     ═══════════════════════════════════════════════════════════ -->
+
+<button onclick="toggleTheme()" style="background:none; border:none; cursor:pointer; margin-left:15px; font-size: 1.2rem;">🌓</button>
+<button onclick="openExportModal()" class="export-fab-btn" title="Export / Import data">⬆ Export</button>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     STEP 2 — Add this ENTIRE modal block anywhere inside <body>
+     (e.g. just before the closing </body> tag)
+     ═══════════════════════════════════════════════════════════ -->
+
+<div id="exportImportModal" class="modal-overlay" onclick="if(event.target===this)closeExportModal()">
+  <div class="modal-card export-modal-card">
+
+    <div class="export-modal-head">
+      <div>
+        <div class="month-detail-kicker">Data Management</div>
+        <h2 style="font-weight:800; font-size:1.3rem; margin:0;">Export / Import</h2>
+      </div>
+      <button type="button" class="month-close" onclick="closeExportModal()" aria-label="Close">×</button>
+    </div>
+
+    <!-- EXPORT SECTION -->
+    <div class="export-section-label">Export your data</div>
+    <div class="export-btn-grid">
+
+      <button type="button" class="export-action-btn" onclick="exportJSON()">
+        <span class="export-icon">{ }</span>
+        <div>
+          <div class="export-btn-title">JSON Backup</div>
+          <div class="export-btn-sub">Full data · restore later</div>
+        </div>
+      </button>
+
+      <button type="button" class="export-action-btn" onclick="exportPDF()">
+        <span class="export-icon" style="color:#ef4444;">⬇</span>
+        <div>
+          <div class="export-btn-title">PDF Report</div>
+          <div class="export-btn-sub">Printable summary</div>
+        </div>
+      </button>
+
+      <button type="button" class="export-action-btn" onclick="exportTXT()">
+        <span class="export-icon" style="color:#10b981;">T</span>
+        <div>
+          <div class="export-btn-title">Text File</div>
+          <div class="export-btn-sub">Plain text log</div>
+        </div>
+      </button>
+
+      <button type="button" class="export-action-btn" onclick="exportCSV()">
+        <span class="export-icon" style="color:#f59e0b;">⊞</span>
+        <div>
+          <div class="export-btn-title">CSV Spreadsheet</div>
+          <div class="export-btn-sub">Open in Excel / Sheets</div>
+        </div>
+      </button>
+
+    </div>
+
+    <!-- DIVIDER -->
+    <div class="export-divider"><span>Import</span></div>
+
+    <!-- IMPORT SECTION -->
+    <div class="export-section-label">Restore from file</div>
+    <button type="button" class="export-import-btn" onclick="importJSON()">
+      <span style="font-size:1.4rem;">📂</span>
+      <div>
+        <div class="export-btn-title">Import JSON Backup</div>
+        <div class="export-btn-sub">Merges tasks &amp; logs with current data</div>
+      </div>
+    </button>
+
+    <p style="font-size:0.78rem; color:var(--text-dim); margin-top:14px; text-align:center; line-height:1.5;">
+      Import is safe — it merges, not overwrites.<br>Existing data is never deleted.
+    </p>
+
+  </div>
+</div>
