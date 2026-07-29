@@ -1,267 +1,405 @@
-
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="/gatividhiya/favicon.png">
-    <meta name="google-site-verification" content="xrZFu5cpuycZgitIQWcRT0DmD7er9zSVNmzWktTYs10" />
-    <meta name="description" content="Gatividhiya helps students and individuals track daily activities, monitor productivity, analyze performance, and stay consistent with goals through powerful insights.">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Gatividhi Tracker — Track daily activities, monitor productivity, and stay consistent with your goals.">
+  <meta name="theme-color" content="#09090b">
+  <meta name="google-site-verification" content="xrZFu5cpuycZgitIQWcRT0DmD7er9zSVNmzWktTYs10">
 
-<title>Gatividhi Tracker | Toolify</title>
+  <title>Gatividhi Tracker | Toolify</title>
 
-<!-- PWA -->
-<link rel="manifest" href="/gatividhiya/manifest.json">
-<meta name="theme-color" content="#0f172a">
-<link rel="apple-touch-icon" href="/gatividhiya/icons/icon-192.png">
+  <!-- PWA -->
+  <link rel="manifest" href="/gatividhiya/manifest.json">
+  <link rel="apple-touch-icon" href="/gatividhiya/icons/icon-192.png">
+  <link rel="icon" type="image/png" href="/gatividhiya/favicon.png">
 
-<!-- Fonts + Charts -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-<!-- Styles -->
-<link rel="stylesheet" href="assets/index.css"> 
- <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
 
-<!-- App Script -->
-<script src="assets/index.js" defer></script>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
 
+  <!-- Styles -->
+  <link rel="stylesheet" href="assets/index.css">
+
+  <!-- App -->
+  <script src="assets/index.js" defer></script>
 </head>
 
 <body>
 
-<div id="editModal" class="modal-overlay">
-    <div class="modal-card">
-        <h2 style="font-weight: 800; font-size: 1.3rem; margin-bottom: 10px;">Edit Activity</h2>
-        <p style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 20px;">Update the name and goal for this month.</p>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-            <div class="input-wrapper">
-                <input type="text" id="editName" placeholder="Enter activity name here...">
-                <span class="clear-btn" onclick="document.getElementById('editName').value=''">×</span>
-            </div>
-            <div class="input-wrapper">
-                <input type="number" id="editTarget" placeholder="Enter number of days here...">
-                <span class="clear-btn" onclick="document.getElementById('editTarget').value=''">×</span>
-            </div>
-        </div>
-        <div style="display: flex; gap: 10px; margin-top: 25px;">
-            <button class="m-btn m-btn-cancel" style="flex:1; padding:14px; border-radius:12px; border:none; cursor:pointer; font-weight:800; background:var(--bg); color:var(--text-main); border: 1px solid var(--border);" onclick="closeModals()">Cancel</button>
-            <button class="m-btn m-btn-confirm" style="flex:1; padding:14px; border-radius:12px; border:none; cursor:pointer; font-weight:800; background:var(--accent); color:white;" id="saveEditBtn">Save Changes</button>
-        </div>
-    </div>
-</div>
+<!-- ============================================================
+     NAVIGATION
+     ============================================================ -->
+<nav class="top-nav" role="navigation" aria-label="Main navigation">
+  <div class="logo">
+    Gatividhi Tracker
+    <span>by Toolify</span>
+  </div>
 
-<div id="deleteModal" class="modal-overlay">
-    <div class="modal-card">
-        <h2 style="font-weight: 800; font-size: 1.3rem; margin-bottom: 10px; color: var(--danger);">Delete Activity?</h2>
-        <p style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 20px;">This will permanently remove the activity and all logged history. This cannot be undone.</p>
-        <div style="display: flex; gap: 10px; margin-top: 25px;">
-            <button class="m-btn m-btn-cancel" style="flex:1; padding:14px; border-radius:12px; border:none; cursor:pointer; font-weight:800; background:var(--bg); color:var(--text-main); border: 1px solid var(--border);" onclick="closeModals()">Cancel</button>
-            <button class="m-btn m-btn-danger" style="flex:1; padding:14px; border-radius:12px; border:none; cursor:pointer; font-weight:800; background:var(--danger); color:white;" id="confirmDelBtn">Confirm Delete</button>
-        </div>
-    </div>
-</div>
-
-<nav class="top-nav">
-    <div class="logo">Gatividhi Tracker <span>by Toolify</span></div>
-    
   <div id="auth-ui">
-    <button type="button" id="login-btn" onclick="handleLogin()">
-        Sign in with Google
-    </button>
-    
-    <div id="user-info" style="display: none;">
-        <img id="user-pic" src="" alt="User Profile">
-        <span id="user-name"></span> 
-        <button type="button" id="logout-btn" onclick="handleLogout()">
-            Sign Out
-        </button>
+    <button type="button" id="login-btn" onclick="handleLogin()">Sign in with Google</button>
+    <div id="user-info" aria-live="polite">
+      <img id="user-pic" src="" alt="Profile picture">
+      <span id="user-name"></span>
+      <button type="button" id="logout-btn" onclick="handleLogout()">Sign Out</button>
     </div>
-</div> 
+  </div>
 
-
- <div class="time-box">
-    <div id="liveTime">00:00:00 PM</div>
+  <div class="time-box" aria-live="polite">
+    <div id="liveTime">--:--:-- --</div>
     <div id="liveDate">LOADING...</div>
-</div>
+  </div>
 </nav>
 
 
-<div id="monthDetailModal" class="modal-overlay" onclick="closeMonthModal(event)" aria-hidden="true">
+<!-- ============================================================
+     MAIN CONTENT
+     ============================================================ -->
+<main class="container">
+
+  <!-- Toolbar: Tabs + Actions -->
+  <div class="toolbar">
+    <div class="tabs" role="tablist">
+      <button class="tab active" id="tab-track" role="tab" aria-selected="true"  onclick="switchView('track')">Tracking</button>
+      <button class="tab"        id="tab-stats" role="tab" aria-selected="false" onclick="switchView('stats')">Analytics</button>
+    </div>
+    <div class="toolbar-actions">
+      <button class="icon-btn" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle theme">🌓</button>
+      <button class="icon-btn" onclick="openExportModal()" title="Export / Import">⬆ Export</button>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════
+       TRACKING VIEW
+       ══════════════════════════════════════ -->
+  <div id="trackView" role="tabpanel">
+
+    <!-- Focus Timer -->
+    <div class="timer-card">
+      <div class="timer-header">
+        <span class="timer-title">⏱ Deep Work Timer</span>
+        <div class="timer-presets">
+          <button class="preset-btn active" onclick="setTimerPreset(25, this)">25m</button>
+          <button class="preset-btn"        onclick="setTimerPreset(50, this)">50m</button>
+          <button class="preset-btn"        onclick="setTimerPreset(0,  this)">Stopwatch</button>
+        </div>
+      </div>
+
+      <select id="timerTaskSelect" class="timer-select" aria-label="Select activity to focus on">
+        <option value="">— Select activity to focus on —</option>
+      </select>
+
+      <div id="timerDisplay" class="timer-display" aria-live="off">25:00</div>
+
+      <div class="timer-controls">
+        <button id="timerToggleBtn" class="timer-btn timer-btn-primary" onclick="toggleTimer()">Start Focus</button>
+        <button class="timer-btn timer-btn-secondary" onclick="resetTimer()">Reset</button>
+        <button class="timer-btn timer-btn-success"   onclick="openSessionModalFromTimer()">Log Session</button>
+      </div>
+    </div>
+
+    <!-- Quick Add Chips -->
+    <div class="section-label">Quick Add <em>Scroll for more →</em></div>
+    <div class="chips-row" id="chips" role="list">
+      <div class="chip" role="listitem" onclick="quickAdd('Math Practice 📚')">Math Practice 📚</div>
+      <div class="chip" role="listitem" onclick="quickAdd('Current Affairs 📰')">Current Affairs 📰</div>
+      <div class="chip" role="listitem" onclick="quickAdd('Swimming 🏊')">Swimming 🏊</div>
+      <div class="chip" role="listitem" onclick="quickAdd('Gym Workout 🏋️')">Gym Workout 🏋️</div>
+      <div class="chip" role="listitem" onclick="quickAdd('Cycling 🚴')">Cycling 🚴</div>
+      <div class="chip" role="listitem" onclick="quickAdd('Running 🏃')">Running 🏃</div>
+      <div class="chip" role="listitem" onclick="quickAdd('Reading 📖')">Reading 📖</div>
+      <div class="chip" role="listitem" onclick="quickAdd('Meditation 🧘')">Meditation 🧘</div>
+      <div class="chip" role="listitem" onclick="quickAdd('Coding 💻')">Coding 💻</div>
+      <div class="chip" role="listitem" onclick="quickAdd('Journaling ✍️')">Journaling ✍️</div>
+      <div class="chip" role="listitem" onclick="quickAdd('Language Study 🗣️')">Language Study 🗣️</div>
+    </div>
+
+    <!-- Add Activity Form -->
+    <div class="entry-card">
+      <div class="section-label" style="margin-bottom:14px;">Add New Activity</div>
+      <div class="entry-grid">
+        <div class="input-wrapper">
+          <input type="text" id="tName" placeholder="Activity name…" autocomplete="off"
+                 onkeydown="if(event.key==='Enter')addTask()">
+          <span class="clear-btn" onclick="document.getElementById('tName').value=''" aria-label="Clear">×</span>
+        </div>
+        <div class="date-selector">
+    <button type="button" class="date-nav-btn" onclick="shiftDate(-1)" title="Previous Day">
+        &#10094;
+    </button>
+    
+    <input type="date" id="calInput" onchange="refreshUI()">
+    
+    <button type="button" class="date-nav-btn" onclick="shiftDate(1)" title="Next Day">
+        &#10095;
+    </button>
+</div>
+
+        <div class="input-wrapper">
+          <input type="number" id="tTarget" placeholder="Target days" min="1" max="365"
+                 onkeydown="if(event.key==='Enter')addTask()">
+          <span class="clear-btn" onclick="document.getElementById('tTarget').value=''" aria-label="Clear">×</span>
+        </div>
+      </div>
+      <div class="entry-row-2">
+        <select id="tCategory" class="cat-select" aria-label="Category">
+          <option value="General">🏷️ General</option>
+          <option value="Work">💼 Work</option>
+          <option value="Learning">📚 Learning</option>
+          <option value="Health">🏋️ Health</option>
+          <option value="Personal">🏠 Personal</option>
+        </select>
+        <button class="btn-add" onclick="addTask()">+ Add Activity</button>
+      </div>
+    </div>
+
+    <!-- Date + Category Filter -->
+    <div class="date-bar">
+      <input type="date" id="calInput" aria-label="Select date" onchange="refreshUI()">
+      <div class="cat-filter-bar" id="catFilterBar" role="group" aria-label="Filter by category">
+        <button class="cat-chip active" onclick="setCategoryFilter('All')">All</button>
+        <button class="cat-chip" onclick="setCategoryFilter('General')">🏷️ General</button>
+        <button class="cat-chip" onclick="setCategoryFilter('Work')">💼 Work</button>
+        <button class="cat-chip" onclick="setCategoryFilter('Learning')">📚 Learning</button>
+        <button class="cat-chip" onclick="setCategoryFilter('Health')">🏋️ Health</button>
+        <button class="cat-chip" onclick="setCategoryFilter('Personal')">🏠 Personal</button>
+      </div>
+    </div>
+
+    <!-- Task List -->
+    <div class="list-grid" id="taskList" role="list" aria-live="polite"></div>
+
+  </div><!-- /trackView -->
+
+
+  <!-- ══════════════════════════════════════
+       ANALYTICS VIEW
+       ══════════════════════════════════════ -->
+  <div id="statsView" style="display:none;" role="tabpanel">
+
+    <!-- Heatmap -->
+    <div class="card heatmap-card">
+      <div class="stat-header">Annual Consistency — Past 365 Days</div>
+      <div id="heatmapContainer" class="heatmap-container"></div>
+      <div class="heatmap-legend" aria-label="Heatmap legend">
+        <span>Less</span>
+        <span class="sq l0"></span>
+        <span class="sq l1"></span>
+        <span class="sq l2"></span>
+        <span class="sq l3"></span>
+        <span class="sq l4"></span>
+        <span>More</span>
+      </div>
+    </div>
+
+    <!-- Charts Grid -->
+    <div class="stats-grid">
+      <!-- 7-day trend -->
+      <div class="card">
+        <div class="stat-header">7-Day Activity Trend <span id="rangeLabel" style="color:var(--accent);font-weight:700;"></span></div>
+        <div style="height:220px; position:relative;"><canvas id="lineChart"></canvas></div>
+        <div class="graph-nav">
+          <button class="cat-chip" onclick="changeGraphRange(-1)">← Earlier</button>
+          <button class="cat-chip" onclick="changeGraphRange(1)">Later →</button>
+        </div>
+      </div>
+
+      <!-- Deep Work Time -->
+      <div class="card" style="display:flex;flex-direction:column;justify-content:center;">
+        <div class="stat-header">Total Deep Work</div>
+        <div class="stat-val" id="totalFocusHours">0.0 hrs</div>
+        <div style="font-size:0.78rem;color:var(--text-2);margin-top:4px;">Logged this month</div>
+      </div>
+
+      <!-- Today's completion pie -->
+      <div class="card">
+        <div class="stat-header">Today's Completion</div>
+        <div style="height:220px; position:relative;"><canvas id="pieChart"></canvas></div>
+      </div>
+
+      <!-- Placeholder hidden time chart slot -->
+      <div class="card" style="display:none; grid-column:1/-1;">
+        <div class="stat-header">Time Distribution by Activity (Hours)</div>
+        <canvas id="timeChart" style="max-height:220px;"></canvas>
+      </div>
+    </div>
+
+    <!-- Monthly summary list -->
+    <div id="monthList"></div>
+
+  </div><!-- /statsView -->
+
+</main>
+
+
+<!-- ============================================================
+     MODALS
+     ============================================================ -->
+
+<!-- Edit Activity -->
+<div id="editModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+  <div class="modal-card">
+    <p class="modal-title" id="editModalTitle">Edit Activity</p>
+    <p class="modal-sub">Update the name, goal, and category.</p>
+    <div class="modal-form">
+      <div class="input-wrapper">
+        <input type="text" id="editName" placeholder="Activity name…">
+        <span class="clear-btn" onclick="document.getElementById('editName').value=''">×</span>
+      </div>
+      <div class="input-wrapper">
+        <input type="number" id="editTarget" placeholder="Target days" min="1" max="365">
+        <span class="clear-btn" onclick="document.getElementById('editTarget').value=''">×</span>
+      </div>
+      <select id="editCategory" class="cat-select">
+        <option value="General">🏷️ General</option>
+        <option value="Work">💼 Work</option>
+        <option value="Learning">📚 Learning</option>
+        <option value="Health">🏋️ Health</option>
+        <option value="Personal">🏠 Personal</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="m-btn m-btn-cancel" onclick="closeModals()">Cancel</button>
+      <button class="m-btn m-btn-save" id="saveEditBtn">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirm -->
+<div id="deleteModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+  <div class="modal-card">
+    <p class="modal-title" id="deleteModalTitle" style="color:var(--danger);">Delete Activity?</p>
+    <p class="modal-sub">This permanently removes the activity and all logged history. This cannot be undone.</p>
+    <div class="modal-btns">
+      <button class="m-btn m-btn-cancel" onclick="closeModals()">Cancel</button>
+      <button class="m-btn m-btn-danger" id="confirmDelBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Log Deep Work Session -->
+<div id="sessionModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="sessionModalTitle">
+  <div class="modal-card">
+    <p class="modal-title" id="sessionModalTitle">📝 Log Deep Work Session</p>
+    <p class="modal-sub">Record time spent and your output notes.</p>
+    <input type="hidden" id="sessionTaskId">
+    <div class="modal-form">
+      <label style="font-size:0.8rem;font-weight:700;color:var(--text-2);">Duration (minutes)</label>
+      <input type="number" id="sessionDuration" placeholder="e.g. 45" min="1">
+      <label style="font-size:0.8rem;font-weight:700;color:var(--text-2);">Reflection / Notes</label>
+      <textarea id="sessionNotes" placeholder="What did you accomplish? e.g. Completed Chapter 3, fixed login bug…" rows="3"></textarea>
+    </div>
+    <div class="modal-btns">
+      <button class="m-btn m-btn-cancel" onclick="closeModals()">Cancel</button>
+      <button class="m-btn m-btn-save" onclick="saveSessionModal()">Save Log</button>
+    </div>
+  </div>
+</div>
+
+<!-- Month Detail -->
+<div id="monthDetailModal" class="modal-overlay" role="dialog" aria-modal="true"
+     aria-labelledby="monthModalTitle" onclick="closeMonthModal(event)">
   <div class="modal-card month-detail-card" onclick="event.stopPropagation()">
     <div class="month-detail-head">
       <div>
-        <div class="month-detail-kicker">Month details</div>
-        <h2 id="monthModalTitle" style="font-weight:800; font-size:1.3rem;">Month</h2>
+        <div class="month-detail-kicker">Month breakdown</div>
+        <h2 id="monthModalTitle" style="font-size:1.2rem;">Month</h2>
       </div>
-      <button type="button" class="month-close" onclick="hideMonthModal()" aria-label="Close">×</button>
+      <button class="month-close" onclick="hideMonthModal()" aria-label="Close">×</button>
     </div>
     <div id="monthModalContent" class="month-detail-list"></div>
   </div>
 </div>
 
-<div class="container">
-    <div class="tabs">
-        <button class="tab active" id="tab-track" onclick="switchView('track')">Tracking</button>
-        <button class="tab" id="tab-stats" onclick="switchView('stats')">Analytics</button>
-        <button onclick="toggleTheme()" style="background:none; border:none; cursor:pointer; margin-left:15px; font-size: 1.2rem;">🌓</button>
-        <button onclick="openExportModal()" class="export-fab-btn" title="Export / Import data">⬆ Export</button>
-    </div>
-
-    <div id="trackView">
-        <div class="suggestion-label">Quick Add <span>Scroll for more →</span></div>
-        <div class="suggestion-row" id="chips">
-            <div class="chip" onclick="quickAdd('Math Practice 📚')">Math Practice 📚</div>
-            <div class="chip" onclick="quickAdd('Current Affairs 📰')">Current Affairs 📰</div>
-            <div class="chip" onclick="quickAdd('Swimming 🏊')">Swimming 🏊</div>
-            <div class="chip" onclick="quickAdd('Gym Workout 🏋️')">Gym Workout 🏋️</div>
-            <div class="chip" onclick="quickAdd('Cycling 🚴')">Cycling 🚴</div>
-            <div class="chip" onclick="quickAdd('Running 🏃')">Running 🏃</div>
-            <div class="chip" onclick="quickAdd('Reading 📖')">Reading 📖</div>
-            <div class="chip" onclick="quickAdd('Coding 💻')">Coding 💻</div>
-        </div>
-
-        <div class="cal-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h3 style="font-weight: 800; font-size: 1.1rem;">Daily Check-ins</h3>
-            <input type="date" id="calInput" class="custom-date" style="background: var(--surface); color: var(--accent); border: 1px solid var(--border); padding: 10px 15px; border-radius: 12px; font-weight: 800; cursor: pointer;" onchange="refreshUI()">
-        </div>
-
-        <div class="card">
-            <div class="entry-grid">
-                <div class="input-wrapper">
-                    <input type="text" id="tName" placeholder="Enter activity name here...">
-                    <span class="clear-btn" onclick="document.getElementById('tName').value=''">×</span>
-                </div>
-                <div class="input-wrapper">
-                    <input type="number" id="tTarget" placeholder="Enter number of days here...">
-                    <span class="clear-btn" onclick="document.getElementById('tTarget').value=''">×</span>
-                </div>
-                <button class="btn-add" onclick="addTask()">ADD</button>
-            </div>
-        </div>
-
-        <div class="list-grid" id="taskList"></div>
-    </div>
-
-    <div id="statsView" style="display: none;">
-        <div class="stats-grid">
-            <div class="card">
-                <div class="stat-header">7-DAY ACTIVITY TREND <span id="rangeLabel"></span></div>
-                <div style="height: 250px; position: relative;"><canvas id="lineChart"></canvas></div>
-                <div class="graph-nav">
-                    <button class="nav-btn" onclick="changeGraphRange(-1)">← Earlier</button>
-                    <button class="nav-btn" onclick="changeGraphRange(1)">Later →</button>
-                </div>
-            </div>
-            <div class="card">
-                <div class="stat-header">TODAY'S COMPLETION</div>
-                <div style="height: 250px; position: relative;"><canvas id="pieChart"></canvas></div>
-            </div>
-        </div>
-        <div id="monthList"></div>
-    </div>
-</div>
-    <footer id="footer">
-    <p style="color:#8e8e93; font-weight: 600;">Created on 25 april 2026</p>
-    <div style="margin-top:15px;">
-       
-  <a href="https://mohakdev1220.github.io/websites_link/" target="_blank">
-  Other Websites
-</a>
-    </div>
-</footer>
-    
-<!-- ═══════════════════════════════════════════════════════════
-     STEP 2 — Add this ENTIRE modal block anywhere inside <body>
-     (e.g. just before the closing </body> tag)
-     ═══════════════════════════════════════════════════════════ -->
-
-<div id="exportImportModal" class="modal-overlay" onclick="if(event.target===this)closeExportModal()">
+<!-- Export / Import -->
+<div id="exportImportModal" class="modal-overlay" role="dialog" aria-modal="true"
+     aria-labelledby="exportModalTitle" onclick="if(event.target===this)closeExportModal()">
   <div class="modal-card export-modal-card">
-
     <div class="export-modal-head">
       <div>
         <div class="month-detail-kicker">Data Management</div>
-        <h2 style="font-weight:800; font-size:1.3rem; margin:0;">Export / Import</h2>
+        <h2 id="exportModalTitle" style="font-size:1.2rem;">Export / Import</h2>
       </div>
-      <button type="button" class="month-close" onclick="closeExportModal()" aria-label="Close">×</button>
+      <button class="month-close" onclick="closeExportModal()" aria-label="Close">×</button>
     </div>
 
-    <!-- EXPORT SECTION -->
-    <div class="export-section-label">Export your data</div>
+    <div class="section-kicker">Export your data</div>
     <div class="export-btn-grid">
-
       <button type="button" class="export-action-btn" onclick="exportJSON()">
         <span class="export-icon">{ }</span>
         <div>
           <div class="export-btn-title">JSON Backup</div>
-          <div class="export-btn-sub">Full data · restore later</div>
+          <div class="export-btn-sub">Full backup · restore anytime</div>
         </div>
       </button>
-
       <button type="button" class="export-action-btn" onclick="exportPDF()">
-        <span class="export-icon" style="color:#ef4444;">⬇</span>
+        <span class="export-icon" style="color:var(--danger);">⬇</span>
         <div>
           <div class="export-btn-title">PDF Report</div>
           <div class="export-btn-sub">Printable summary</div>
         </div>
       </button>
-
       <button type="button" class="export-action-btn" onclick="exportTXT()">
-        <span class="export-icon" style="color:#10b981;">T</span>
+        <span class="export-icon" style="color:var(--success);">T</span>
         <div>
           <div class="export-btn-title">Text File</div>
           <div class="export-btn-sub">Plain text log</div>
         </div>
       </button>
-
       <button type="button" class="export-action-btn" onclick="exportCSV()">
-        <span class="export-icon" style="color:#f59e0b;">⊞</span>
+        <span class="export-icon" style="color:var(--warn);">⊞</span>
         <div>
           <div class="export-btn-title">CSV Spreadsheet</div>
           <div class="export-btn-sub">Open in Excel / Sheets</div>
         </div>
       </button>
-
     </div>
 
-    <!-- DIVIDER -->
-    <div class="export-divider"><span>Import</span></div>
+    <div class="divider-line"><span>Import</span></div>
 
-    <!-- IMPORT SECTION -->
-    <div class="export-section-label">Restore from file</div>
+    <div class="section-kicker">Restore from file</div>
     <button type="button" class="export-import-btn" onclick="importJSON()">
-      <span style="font-size:1.4rem;">📂</span>
+      <span style="font-size:1.5rem;">📂</span>
       <div>
         <div class="export-btn-title">Import JSON Backup</div>
-        <div class="export-btn-sub">Merges tasks &amp; logs with current data</div>
+        <div class="export-btn-sub">Merges tasks &amp; logs — existing data is never deleted</div>
       </div>
     </button>
-
-    <p style="font-size:0.78rem; color:var(--text-dim); margin-top:14px; text-align:center; line-height:1.5;">
-      Import is safe — it merges, not overwrites.<br>Existing data is never deleted.
-    </p>
-
   </div>
 </div>
 
-<!-- Service Worker -->
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer id="footer">
+  <p style="font-size:0.82rem;color:var(--text-3);font-weight:600;">Gatividhi Tracker · Built with ♥ by Mohak Choubey</p>
+  <div style="margin-top:12px;">
+    <a href="https://mohakdev1220.github.io/websites_link/" target="_blank" rel="noopener" class="f-link">Other Projects</a>
+  </div>
+</footer>
+
+
+<!-- ============================================================
+     SERVICE WORKER
+     ============================================================ -->
 <script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", async () => {
-    try {
-      await navigator.serviceWorker.register("/gatividhiya/service-worker.js");
-      console.log("Service Worker Registered");
-    } catch (err) {
-      console.error("SW failed:", err);
-    }
-  });
-}
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/gatividhiya/service-worker.js")
+        .catch(err => console.warn("SW:", err));
+    });
+  }
 </script>
-
-
 
 </body>
 </html>
