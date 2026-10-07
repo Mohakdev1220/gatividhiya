@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Dashboard — Winter Arc</title>
+  <meta
+    name="description"
+    content="Your Winter Arc personal dashboard."
+  >
+
+  <link rel="stylesheet" href="style.css">
+
+  <script type="module" src="auth-checker.js"></script>
+  <script type="module" src="app.js"></script>
+</head>
+
+<body class="app-page">
+
+  <!-- =========================
+       TOP NAVIGATION
+  ========================== -->
+  <header class="app-topbar">
+
+    <a href="dashboard.html" class="app-brand">
+      <span class="brand-mark">W</span>
+
+      <span class="brand-text">
+        <strong>Winter Arc</strong>
+        <small>90 Day Challenge</small>
+      </span>
+    </a>
+
+    <nav class="desktop-nav" aria-label="Main navigation">
+      <a href="dashboard.html" class="nav-link active">
+        My Dashboard
+      </a>
+
+      <a href="friend.html" class="nav-link">
+        Friends
+      </a>
+
+      <a href="about.html" class="nav-link">
+        About
+      </a>
+    </nav>
+
+    <div class="topbar-actions">
+
+      <div class="live-clock" id="liveClock">
+        <span class="clock-dot"></span>
+        <span id="clockTime">--:--</span>
+      </div>
+
+      <button
+        type="button"
+        class="profile-button"
+        id="profileButton"
+        aria-label="Open profile"
+      >
+        <img
+          id="userAvatar"
+          src=""
+          alt="Your profile"
+          class="user-avatar"
+        >
+
+        <span class="profile-name" id="userDisplayName">
+          Loading...
+        </span>
+
+        <span class="profile-chevron">⌄</span>
+      </button>
+
+      <button
+        type="button"
+        class="icon-button"
+        id="signOutButton"
+        aria-label="Sign out"
+        title="Sign out"
+      >
+        <span>↪</span>
+      </button>
+
+    </div>
+  </header>
+
+
+  <!-- =========================
+       MOBILE HEADER
+  ========================== -->
+  <div class="mobile-header">
+
+    <div>
+      <span class="mobile-page-label">Your Dashboard</span>
+      <strong id="mobileUserName">Winter Arc</strong>
+    </div>
+
+    <button
+      type="button"
+      class="mobile-avatar-button"
+      id="mobileProfileButton"
+    >
+      <img
+        id="mobileUserAvatar"
+        src=""
+        alt="Profile"
+      >
+    </button>
+
+  </div>
+
+
+  <!-- =========================
+       MAIN DASHBOARD
+  ========================== -->
+  <main class="dashboard-main">
+
+    <!-- =========================
+         WELCOME HERO
+    ========================== -->
+    <section class="dashboard-hero">
+
+      <div class="hero-copy">
+
+        <span class="eyebrow">
+          WINTER ARC · 90 DAYS
+        </span>
+
+        <h1>
+          Build your winter.
+          <span>One day at a time.</span>
+        </h1>
+
+        <p>
+          Stay consistent, track your progress, and keep your momentum
+          through the full 90-day challenge.
+        </p>
+
+        <div class="hero-date-row">
+
+          <div class="today-badge">
+            <span class="today-dot"></span>
+            <span id="todayLabel">Today</span>
+          </div>
+
+          <span class="hero-separator">•</span>
+
+          <span id="currentDateLabel">
+            Loading date...
+          </span>
+
+        </div>
+
+      </div>
+
+      <div class="hero-progress-card">
+
+        <div class="hero-progress-top">
+          <span>Today's progress</span>
+          <strong id="heroProgressPercent">0%</strong>
+        </div>
+
+        <div class="progress-track large">
+          <div
+            class="progress-fill"
+            id="heroProgressBar"
+            style="width: 0%"
+          ></div>
+        </div>
+
+        <div class="hero-progress-bottom">
+          <span id="heroCompletedText">
+            0 of 3 completed
+          </span>
+
+          <span id="heroStreakText">
+            0 day streak
+          </span>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         CHALLENGE BANNER
+    ========================== -->
+    <section class="challenge-banner">
+
+      <div class="challenge-icon">
+        <span>30</span>
+        <small>MIN</small>
+      </div>
+
+      <div class="challenge-content">
+        <span class="challenge-label">
+          FEATURED CHALLENGE
+        </span>
+
+        <h2>30 Min Daily Exercise Challenge</h2>
+
+        <p>
+          Move your body for at least 30 minutes every day.
+        </p>
+      </div>
+
+      <div class="challenge-status">
+        <span class="status-label">WINTER ARC</span>
+        <strong>90 DAYS</strong>
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         STATISTICS
+    ========================== -->
+    <section class="stats-grid" aria-label="Your statistics">
+
+      <article class="stat-card">
+
+        <div class="stat-icon">🔥</div>
+
+        <div class="stat-info">
+          <span class="stat-label">Current Streak</span>
+          <strong id="currentStreak">0</strong>
+          <small>days</small>
+        </div>
+
+      </article>
+
+
+      <article class="stat-card">
+
+        <div class="stat-icon">✓</div>
+
+        <div class="stat-info">
+          <span class="stat-label">Today's Progress</span>
+          <strong id="todayPercent">0%</strong>
+          <small>completed</small>
+        </div>
+
+      </article>
+
+
+      <article class="stat-card">
+
+        <div class="stat-icon">◷</div>
+
+        <div class="stat-info">
+          <span class="stat-label">Days Completed</span>
+          <strong id="completedDays">0</strong>
+          <small>of 90</small>
+        </div>
+
+      </article>
+
+
+      <article class="stat-card">
+
+        <div class="stat-icon">★</div>
+
+        <div class="stat-info">
+          <span class="stat-label">Overall Progress</span>
+          <strong id="overallPercent">0%</strong>
+          <small>90 day arc</small>
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <!-- =========================
+         MAIN CONTENT GRID
+    ========================== -->
+    <div class="dashboard-content-grid">
+
+
+      <!-- =========================
+           DAILY ACTIVITIES
+      ========================== -->
+      <section class="dashboard-card activities-card">
+
+        <div class="card-header">
+
+          <div>
+            <span class="section-kicker">TODAY</span>
+            <h2>Your Activities</h2>
+            <p id="activityDateLabel">
+              Track what you accomplish today.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="primary-button small"
+            id="addActivityButton"
+          >
+            <span>+</span>
+            Add Activity
+          </button>
+
+        </div>
+
+
+        <div
+          class="activities-list"
+          id="activitiesList"
+        >
+          <!-- Activities are generated by app.js -->
+        </div>
+
+
+        <div class="activity-footer">
+
+          <div class="mini-progress-info">
+            <span>Daily completion</span>
+            <strong id="activityProgressText">0%</strong>
+          </div>
+
+          <div class="progress-track">
+            <div
+              class="progress-fill"
+              id="activityProgressBar"
+              style="width: 0%"
+            ></div>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           FRIEND CARD
+      ========================== -->
+      <aside class="dashboard-card friend-card circle-card">
+
+        <div class="card-header compact">
+          <div>
+            <span class="section-kicker">ACCOUNTABILITY</span>
+            <h2>Your Circle</h2>
+          </div>
+          <span class="circle-count" id="circleCount">0/10</span>
+        </div>
+
+        <div class="friend-empty-state" id="circleEmpty">
+          <div class="empty-avatar">?</div>
+          <h3>No friends yet</h3>
+          <p>Add as many friends as you like. Everyone gets their own dashboard and a spot on the leaderboard.</p>
+          <a href="friend.html" class="secondary-button">Find Friends</a>
+        </div>
+
+        <div class="circle-list" id="circleList" hidden></div>
+
+        <div class="circle-footer" id="circleFooter" hidden>
+          <a href="friend.html" class="secondary-button full-width">Open Friend Dashboards</a>
+        </div>
+
+      </aside>
+
+    </div>
+
+
+    <!-- =========================
+         90 DAY CALENDAR
+    ========================== -->
+    <section class="dashboard-card calendar-card">
+
+      <div class="card-header calendar-header">
+
+        <div>
+          <span class="section-kicker">WINTER ARC</span>
+          <h2>90-Day Calendar</h2>
+
+          <p id="calendarRange">Pick a start date to begin</p>
+        </div>
+
+
+        <div class="calendar-legend">
+
+          <span>
+            <i class="legend-dot starting"></i>
+            Starting Day
+          </span>
+
+          <span>
+            <i class="legend-dot complete"></i>
+            Complete
+          </span>
+
+          <span>
+            <i class="legend-dot partial"></i>
+            Partial
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="calendar-weekdays">
+
+        <span>Sun</span>
+        <span>Mon</span>
+        <span>Tue</span>
+        <span>Wed</span>
+        <span>Thu</span>
+        <span>Fri</span>
+        <span>Sat</span>
+
+      </div>
+
+
+      <div
+        class="calendar-grid"
+        id="calendarGrid"
+      >
+        <!-- 90 days generated by app.js -->
+      </div>
+
+
+      <div class="calendar-hint">
+        <span>Click any day</span>
+        to view or edit your progress.
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         ANALYTICS
+    ========================== -->
+    <section class="analytics-section">
+
+      <div class="section-heading">
+
+        <div>
+          <span class="section-kicker">ANALYTICS</span>
+          <h2>Your Progress</h2>
+          <p>
+            See how consistently you are showing up.
+          </p>
+        </div>
+
+        <span class="analytics-period">
+          Last 7 days
+        </span>
+
+      </div>
+
+
+      <div class="analytics-grid">
+
+
+        <!-- WEEKLY CHART -->
+        <article class="dashboard-card chart-card">
+
+          <div class="chart-header">
+            <div>
+              <span class="chart-label">DAILY COMPLETION</span>
+              <h3>Weekly Progress</h3>
+            </div>
+
+            <strong id="weeklyAverage">
+              0%
+            </strong>
+          </div>
+
+
+          <div
+            class="bar-chart"
+            id="weeklyChart"
+          >
+            <!-- Generated by app.js -->
+          </div>
+
+        </article>
+
+
+        <!-- ACTIVITY CHART -->
+        <article class="dashboard-card chart-card">
+
+          <div class="chart-header">
+            <div>
+              <span class="chart-label">ACTIVITY BREAKDOWN</span>
+              <h3>Consistency</h3>
+            </div>
+
+            <strong id="activityAverage">
+              0%
+            </strong>
+          </div>
+
+
+          <div
+            class="activity-chart"
+            id="activityChart"
+          >
+            <!-- Generated by app.js -->
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         SELECTED DAY SUMMARY
+    ========================== -->
+    <section
+      class="dashboard-card selected-day-card"
+      id="selectedDayCard"
+      hidden
+    >
+
+      <div class="card-header">
+
+        <div>
+          <span class="section-kicker">SELECTED DAY</span>
+          <h2 id="selectedDayTitle">
+            Day Progress
+          </h2>
+
+          <p id="selectedDaySubtitle">
+            Review your activity history.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="secondary-button"
+          id="editSelectedDayButton"
+        >
+          Edit Day
+        </button>
+
+      </div>
+
+
+      <div
+        class="selected-day-activities"
+        id="selectedDayActivities"
+      >
+        <!-- Generated by app.js -->
+      </div>
+
+    </section>
+
+
+    <!-- =========================
+         MOTIVATION FOOTER
+    ========================== -->
+    <section class="dashboard-quote">
+
+      <div class="quote-mark">“</div>
+
+      <p>
+        You don't need a perfect day.
+        You need another consistent one.
+      </p>
+
+      <span>
+        WINTER ARC · DAY BY DAY
+      </span>
+
+    </section>
+
+  </main>
+
+
+  <!-- =========================
+       MOBILE BOTTOM NAVIGATION
+  ========================== -->
+  <nav class="mobile-bottom-nav">
+
+    <a
+      href="dashboard.html"
+      class="mobile-nav-item active"
+    >
+      <span>⌂</span>
+      <small>Dashboard</small>
+    </a>
+
+    <a
+      href="friend.html"
+      class="mobile-nav-item"
+    >
+      <span>♧</span>
+      <small>Friends</small>
+    </a>
+
+    <button
+      type="button"
+      class="mobile-nav-item"
+      id="mobileAddActivity"
+    >
+      <span>+</span>
+      <small>Add</small>
+    </button>
+
+    <a
+      href="about.html"
+      class="mobile-nav-item"
+    >
+      <span>ⓘ</span>
+      <small>About</small>
+    </a>
+
+    <button
+      type="button"
+      class="mobile-nav-item"
+      id="mobileSignOut"
+    >
+      <span>↪</span>
+      <small>Sign Out</small>
+    </button>
+
+  </nav>
+
+
+  <!-- =====================================================
+       PROFILE POPUP
+  ====================================================== -->
+  <div
+    class="modal-overlay"
+    id="profileModal"
+    hidden
+  >
+
+    <div
+      class="modal-card small-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="profileModalTitle"
+    >
+
+      <button
+        type="button"
+        class="modal-close"
+        data-close-modal="profileModal"
+        aria-label="Close"
+      >
+        ×
+      </button>
+
+      <div class="profile-modal-content">
+
+        <img
+          id="modalUserAvatar"
+          src=""
+          alt="Your profile"
+          class="large-avatar"
+        >
+
+        <span class="modal-kicker">YOUR ACCOUNT</span>
+
+        <h2 id="profileModalTitle">
+          Your Profile
+        </h2>
+
+        <strong id="modalUserName">
+          Loading...
+        </strong>
+
+        <span id="modalUsername">
+          @username
+        </span>
+
+        <span id="modalUserEmail">
+          user@example.com
+        </span>
+
+        <div class="profile-start">
+          <small>ARC START DATE</small>
+          <strong id="modalStartDate">—</strong>
+          <button type="button" class="secondary-button" id="changeStartButton">Change start date</button>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       START DATE MODAL
+  ====================================================== -->
+  <div class="modal-overlay" id="startModal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="startModalTitle">
+      <button type="button" class="modal-close" id="startModalClose" data-close-modal="startModal" aria-label="Close">×</button>
+      <div class="modal-header">
+        <span class="modal-kicker">YOUR 90 DAYS</span>
+        <h2 id="startModalTitle">When does your arc begin?</h2>
+        <p>Pick any day as Day 1, including a past date if you already started. Your 90 days are counted from it.</p>
+      </div>
+      <form id="startForm">
+        <div class="form-field">
+          <label for="startDateInput">Start date</label>
+          <input type="date" id="startDateInput" required>
+        </div>
+        <button type="button" class="secondary-button full-width" id="startTodayButton" style="margin-bottom:12px">Start today</button>
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" id="startCancelButton" data-close-modal="startModal">Cancel</button>
+          <button type="submit" class="primary-button" id="saveStartButton">Save start date</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- =====================================================
+       ADD / EDIT ACTIVITY MODAL
+  ====================================================== -->
+  <div
+    class="modal-overlay"
+    id="activityModal"
+    hidden
+  >
+
+    <div
+      class="modal-card"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="activityModalTitle"
+    >
+
+      <button
+        type="button"
+        class="modal-close"
+        data-close-modal="activityModal"
+        aria-label="Close"
+      >
+        ×
+      </button>
+
+
+      <div class="modal-header">
+
+        <span class="modal-kicker">
+          YOUR ROUTINE
+        </span>
+
+        <h2 id="activityModalTitle">
+          Add Activity
+        </h2>
+
+        <p>
+          Create a habit or routine item you want to track.
+        </p>
+
+      </div>
+
+
+      <form id="activityForm">
+
+        <input
+          type="hidden"
+          id="activityId"
+        >
+
+
+        <div class="form-field">
+
+          <label for="activityName">
+            Activity name
+          </label>
+
+          <input
+            type="text"
+            id="activityName"
+            name="activityName"
+            placeholder="e.g. Reading"
+            maxlength="60"
+            required
+          >
+
+        </div>
+
+
+        <div class="form-field">
+
+          <label for="activityTarget">
+            Daily target
+          </label>
+
+          <input
+            type="text"
+            id="activityTarget"
+            name="activityTarget"
+            placeholder="e.g. 30 minutes"
+            maxlength="50"
+            required
+          >
+
+        </div>
+
+
+        <div class="modal-actions">
+
+          <button
+            type="button"
+            class="secondary-button"
+            data-close-modal="activityModal"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button"
+            id="saveActivityButton"
+          >
+            Save Activity
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       DAY EDITOR MODAL
+  ====================================================== -->
+  <div
+    class="modal-overlay"
+    id="dayModal"
+    hidden
+  >
+
+    <div
+      class="modal-card day-modal-card"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="dayModalTitle"
+    >
+
+      <button
+        type="button"
+        class="modal-close"
+        data-close-modal="dayModal"
+        aria-label="Close"
+      >
+        ×
+      </button>
+
+
+      <div class="modal-header">
+
+        <span class="modal-kicker">
+          WINTER ARC
+        </span>
+
+        <h2 id="dayModalTitle">
+          Edit Day
+        </h2>
+
+        <p id="dayModalDate">
+          Select your completed activities.
+        </p>
+
+      </div>
+
+
+      <div
+        class="day-editor-list"
+        id="dayEditorList"
+      >
+        <!-- Generated by app.js -->
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="secondary-button"
+          data-close-modal="dayModal"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="primary-button"
+          id="saveDayButton"
+        >
+          Save Progress
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       DELETE CONFIRMATION MODAL
+  ====================================================== -->
+  <div
+    class="modal-overlay"
+    id="deleteModal"
+    hidden
+  >
+
+    <div
+      class="modal-card small-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="deleteModalTitle"
+    >
+
+      <button
+        type="button"
+        class="modal-close"
+        data-close-modal="deleteModal"
+        aria-label="Close"
+      >
+        ×
+      </button>
+
+
+      <div class="delete-modal-icon">
+        ×
+      </div>
+
+      <span class="modal-kicker">
+        REMOVE ACTIVITY
+      </span>
+
+      <h2 id="deleteModalTitle">
+        Delete this activity?
+      </h2>
+
+      <p id="deleteModalText">
+        This activity will be removed from your routine.
+      </p>
+
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="secondary-button"
+          data-close-modal="deleteModal"
+        >
+          Keep It
+        </button>
+
+        <button
+          type="button"
+          class="danger-button"
+          id="confirmDeleteButton"
+        >
+          Delete
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       TOAST NOTIFICATIONS
+  ====================================================== -->
+  <div
+    class="toast-container"
+    id="toastContainer"
+    aria-live="polite"
+    aria-atomic="true"
+  ></div>
+
+
+  <!-- =====================================================
+       LOADING OVERLAY
+  ====================================================== -->
+  <div
+    class="page-loader"
+    id="pageLoader"
+  >
+
+    <div class="loader-spinner"></div>
+
+    <span>
+      Loading your Winter Arc...
+    </span>
+
+  </div>
+
+
+  <!-- =====================================================
+       FIREBASE / APPLICATION LOGIC
+       app.js handles:
+       - Firestore
+       - activities
+       - daily progress
+       - calendar
+       - charts
+       - friend preview
+       - modals
+       - notifications
+  ====================================================== -->
+
+</body>
+</html>

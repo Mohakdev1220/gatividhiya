@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="description"
+    content="Sign in to your Winter Arc dashboard."
+  >
+
+  <title>Sign In — Winter Arc</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="auth-page">
+
+  <!-- ================= BACKGROUND ================= -->
+
+  <div class="auth-background">
+
+    <div class="auth-glow auth-glow-one"></div>
+    <div class="auth-glow auth-glow-two"></div>
+
+    <div class="auth-grid"></div>
+
+  </div>
+
+
+  <!-- ================= NAV ================= -->
+
+  <nav class="auth-nav">
+
+    <a href="index.html" class="site-logo">
+
+      <span class="logo-box">
+        WA
+      </span>
+
+      <span>
+        <strong>Winter Arc</strong>
+        <small>2026</small>
+      </span>
+
+    </a>
+
+    <a
+      href="index.html"
+      class="back-link"
+    >
+      ← Back to website
+    </a>
+
+  </nav>
+
+
+  <!-- ================= AUTH CARD ================= -->
+
+  <main class="auth-main">
+
+    <section class="auth-card-new">
+
+      <div class="auth-card-top">
+
+        <div class="auth-logo-large">
+          WA
+        </div>
+
+        <span class="eyebrow">
+          WINTER ARC · 2026
+        </span>
+
+        <h1>
+          Welcome back.
+        </h1>
+
+        <p>
+          Sign in to continue your
+          Winter Arc journey.
+        </p>
+
+      </div>
+
+
+      <!-- GOOGLE -->
+
+      <button
+        id="googleSignIn"
+        class="google-signin-button"
+        type="button"
+      >
+
+        <span class="google-logo">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              fill="#4285F4"
+              d="M21.35 12.23c0-.79-.07-1.55-.2-2.27H12v4.3h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.42Z"
+            />
+
+            <path
+              fill="#34A853"
+              d="M12 21.5c2.63 0 4.84-.87 6.45-2.35l-3.14-2.45c-.87.58-1.98.92-3.31.92-2.54 0-4.7-1.72-5.47-4.03H3.28v2.53A9.74 9.74 0 0 0 12 21.5Z"
+            />
+
+            <path
+              fill="#FBBC05"
+              d="M6.53 13.59A5.85 5.85 0 0 1 6.22 12c0-.55.11-1.08.31-1.59V7.88H3.28A9.5 9.5 0 0 0 2.25 12c0 1.53.37 2.98 1.03 4.12l3.25-2.53Z"
+            />
+
+            <path
+              fill="#EA4335"
+              d="M12 6.38c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.83 3.49 14.63 2.5 12 2.5a9.74 9.74 0 0 0-8.72 5.38l3.25 2.53C7.3 8.1 9.46 6.38 12 6.38Z"
+            />
+          </svg>
+        </span>
+
+        <span>
+          Continue with Google
+        </span>
+
+        <span class="google-arrow">
+          →
+        </span>
+
+      </button>
+
+
+      <!-- STATUS -->
+
+      <div
+        id="authStatus"
+        class="auth-status"
+        role="status"
+        aria-live="polite"
+      ></div>
+
+
+      <!-- INFO -->
+
+      <div class="auth-info">
+
+        <div class="auth-info-icon">
+          ✓
+        </div>
+
+        <div>
+
+          <strong>
+            One account is all you need
+          </strong>
+
+          <p>
+            Your Google account identifies you.
+            Your Winter Arc data is stored securely
+            in Firebase.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- FEATURES -->
+
+      <div class="signin-features">
+
+        <div class="signin-feature">
+
+          <span>01</span>
+
+          <div>
+            <strong>
+              Private dashboard
+            </strong>
+
+            <small>
+              Your progress stays yours.
+            </small>
+          </div>
+
+        </div>
+
+
+        <div class="signin-feature">
+
+          <span>02</span>
+
+          <div>
+            <strong>
+              Friend accountability
+            </strong>
+
+            <small>
+              Share progress without giving edit access.
+            </small>
+          </div>
+
+        </div>
+
+
+        <div class="signin-feature">
+
+          <span>03</span>
+
+          <div>
+            <strong>
+              90-day tracking
+            </strong>
+
+            <small>
+              Track every day of your Winter Arc.
+            </small>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <p class="auth-terms">
+
+        By continuing, you agree to use Winter Arc
+        for personal habit and accountability tracking.
+
+      </p>
+
+    </section>
+
+
+    <!-- ================= SIDE CONTENT ================= -->
+
+    <aside class="auth-side">
+
+      <div class="side-label">
+        YOUR ARC
+      </div>
+
+      <h2>
+        90 days.
+        <br>
+        <span>One direction.</span>
+      </h2>
+
+      <p>
+        You choose your own Day 1.
+        Complete your activities, stay consistent
+        and keep your friend accountable.
+      </p>
+
+
+      <div class="side-date">
+
+        <div>
+          <strong>01</strong>
+
+          <span>DAY 1</span>
+        </div>
+
+        <div class="side-date-line"></div>
+
+        <div>
+          <strong>
+            90
+          </strong>
+
+          <span>
+            DAYS
+          </span>
+        </div>
+
+      </div>
+
+
+      <div class="side-challenge">
+
+        <div class="challenge-mini-number">
+          30
+        </div>
+
+        <div>
+
+          <span>
+            DAILY CHALLENGE
+          </span>
+
+          <strong>
+            30 Min Daily Exercise
+          </strong>
+
+        </div>
+
+      </div>
+
+    </aside>
+
+  </main>
+
+
+  <!-- ================= CUSTOM MODAL ================= -->
+
+  <div
+    id="authModal"
+    class="custom-modal hidden"
+  >
+
+    <div class="custom-modal-backdrop"></div>
+
+    <div class="custom-modal-card">
+
+      <button
+        id="closeAuthModal"
+        class="modal-close"
+        type="button"
+        aria-label="Close"
+      >
+        ×
+      </button>
+
+      <div
+        id="authModalIcon"
+        class="modal-status-icon"
+      >
+        !
+      </div>
+
+      <h2 id="authModalTitle">
+        Something went wrong
+      </h2>
+
+      <p id="authModalText">
+        Please try again.
+      </p>
+
+      <button
+        id="authModalButton"
+        class="primary-button modal-button"
+        type="button"
+      >
+        Try again
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- ================= LOADING ================= -->
+
+  <div
+    id="authLoading"
+    class="auth-loading hidden"
+  >
+
+    <div class="auth-loading-card">
+
+      <div class="loading-spinner"></div>
+
+      <strong>
+        Signing you in
+      </strong>
+
+      <span>
+        Connecting to your Winter Arc...
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- ================= SCRIPT ================= -->
+
+  <script type="module">
+
+    import {
+      initializeApp
+    } from
+      "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+
+    import {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      onAuthStateChanged
+    } from
+      "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+
+    /*
+      ============================================================
+      FIREBASE CONFIG
+      ============================================================
+
+      Replace these values with your Firebase Web App config.
+
+      Firebase Console:
+      Project Settings
+      → Your apps
+      → Web app
+      → Firebase SDK snippet
+    */
+
+   // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCfOzZdWyPJE4A_Vz_5h1ElS0_m_EXTenw",
+  authDomain: "gatividhiya.firebaseapp.com",
+  databaseURL: "https://gatividhiya-default-rtdb.firebaseio.com",
+  projectId: "gatividhiya",
+  storageBucket: "gatividhiya.firebasestorage.app",
+  messagingSenderId: "305825266364",
+  appId: "1:305825266364:web:b4e7b0921644f88b632eb9",
+  measurementId: "G-VY9CXGMPKZ"
+};
+
+    const firebaseApp =
+      initializeApp(firebaseConfig);
+
+
+    const auth =
+      getAuth(firebaseApp);
+
+
+    const googleProvider =
+      new GoogleAuthProvider();
+
+
+    /*
+      ============================================================
+      DOM
+    */
+
+    const googleButton =
+      document.getElementById(
+        "googleSignIn"
+      );
+
+    const status =
+      document.getElementById(
+        "authStatus"
+      );
+
+    const loading =
+      document.getElementById(
+        "authLoading"
+      );
+
+    const modal =
+      document.getElementById(
+        "authModal"
+      );
+
+    const modalTitle =
+      document.getElementById(
+        "authModalTitle"
+      );
+
+    const modalText =
+      document.getElementById(
+        "authModalText"
+      );
+
+    const modalIcon =
+      document.getElementById(
+        "authModalIcon"
+      );
+
+    const modalButton =
+      document.getElementById(
+        "authModalButton"
+      );
+
+    const closeModal =
+      document.getElementById(
+        "closeAuthModal"
+      );
+
+
+    /*
+      ============================================================
+      GOOGLE SIGN IN
+    */
+
+    googleButton.addEventListener(
+      "click",
+      async () => {
+
+        setLoading(true);
+
+        clearStatus();
+
+        try {
+
+          await signInWithPopup(
+            auth,
+            googleProvider
+          );
+
+          /*
+            Firebase's auth state listener below will handle
+            the redirect after authentication succeeds.
+          */
+
+        } catch (error) {
+
+          console.error(
+            "Google sign-in error:",
+            error
+          );
+
+          setLoading(false);
+
+          showAuthError(error);
+        }
+      }
+    );
+
+
+    /*
+      ============================================================
+      AUTH STATE
+    */
+
+    onAuthStateChanged(
+      auth,
+      user => {
+
+        if (user) {
+
+          /*
+            The user is already authenticated.
+            Send them straight to their dashboard.
+          */
+
+          window.location.replace(
+            "dashboard.html"
+          );
+
+        } else {
+
+          setLoading(false);
+        }
+      }
+    );
+
+
+    /*
+      ============================================================
+      LOADING
+    */
+
+    function setLoading(isLoading) {
+
+      if (isLoading) {
+
+        loading.classList.remove(
+          "hidden"
+        );
+
+        googleButton.disabled = true;
+
+        googleButton.classList.add(
+          "is-loading"
+        );
+
+      } else {
+
+        loading.classList.add(
+          "hidden"
+        );
+
+        googleButton.disabled = false;
+
+        googleButton.classList.remove(
+          "is-loading"
+        );
+      }
+    }
+
+
+    /*
+      ============================================================
+      STATUS
+    */
+
+    function clearStatus() {
+
+      status.textContent = "";
+
+      status.className =
+        "auth-status";
+    }
+
+
+    /*
+      ============================================================
+      CUSTOM ERROR MODAL
+    */
+
+    function showAuthError(error) {
+
+      let title =
+        "Sign-in failed";
+
+      let message =
+        "We couldn't sign you in. Please try again.";
+
+      switch (error.code) {
+
+        case "auth/popup-closed-by-user":
+
+          title =
+            "Sign-in cancelled";
+
+          message =
+            "The Google sign-in window was closed before authentication finished.";
+
+          break;
+
+
+        case "auth/popup-blocked":
+
+          title =
+            "Popup blocked";
+
+          message =
+            "Your browser blocked the Google sign-in window. Allow popups for this site and try again.";
+
+          break;
+
+
+        case "auth/cancelled-popup-request":
+
+          title =
+            "Sign-in already open";
+
+          message =
+            "A Google sign-in window is already being opened.";
+
+          break;
+
+
+        case "auth/network-request-failed":
+
+          title =
+            "Connection problem";
+
+          message =
+            "Check your internet connection and try again.";
+
+          break;
+
+
+        case "auth/unauthorized-domain":
+
+          title =
+            "Domain not authorized";
+
+          message =
+            "This website domain has not been added to Firebase Authentication's authorized domains.";
+
+          break;
+
+
+        default:
+
+          message =
+            error.message ||
+            message;
+      }
+
+
+      modalTitle.textContent =
+        title;
+
+      modalText.textContent =
+        message;
+
+      modalIcon.textContent =
+        "!";
+
+      modalIcon.className =
+        "modal-status-icon error";
+
+      modalButton.textContent =
+        "Try again";
+
+      modal.classList.remove(
+        "hidden"
+      );
+    }
+
+
+    /*
+      ============================================================
+      CLOSE MODAL
+    */
+
+    function hideModal() {
+
+      modal.classList.add(
+        "hidden"
+      );
+    }
+
+
+    closeModal.addEventListener(
+      "click",
+      hideModal
+    );
+
+
+    modalButton.addEventListener(
+      "click",
+      () => {
+
+        hideModal();
+
+        googleButton.focus();
+      }
+    );
+
+
+    /*
+      Close when clicking outside card.
+    */
+
+    modal.addEventListener(
+      "click",
+      event => {
+
+        if (
+          event.target === modal ||
+          event.target.classList.contains(
+            "custom-modal-backdrop"
+          )
+        ) {
+          hideModal();
+        }
+      }
+    );
+
+
+    /*
+      Escape key.
+    */
+
+    document.addEventListener(
+      "keydown",
+      event => {
+
+        if (
+          event.key === "Escape" &&
+          !modal.classList.contains(
+            "hidden"
+          )
+        ) {
+          hideModal();
+        }
+      }
+    );
+
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Friend Dashboard — Winter Arc</title>
+  <meta
+    name="description"
+    content="View your Winter Arc friend's progress and stay accountable together."
+  >
+
+  <link rel="stylesheet" href="style.css">
+
+  <script type="module" src="auth-checker.js"></script>
+  <script type="module" src="app.js"></script>
+</head>
+
+<body class="app-page friend-page">
+
+  <!-- =========================
+       TOP NAVIGATION
+  ========================== -->
+  <header class="app-topbar">
+
+    <a href="dashboard.html" class="app-brand">
+      <span class="brand-mark">W</span>
+
+      <span class="brand-text">
+        <strong>Winter Arc</strong>
+        <small>90 Day Challenge</small>
+      </span>
+    </a>
+
+
+    <nav class="desktop-nav" aria-label="Main navigation">
+
+      <a
+        href="dashboard.html"
+        class="nav-link"
+      >
+        My Dashboard
+      </a>
+
+      <a
+        href="friend.html"
+        class="nav-link active"
+      >
+        Friends
+      </a>
+
+      <a
+        href="about.html"
+        class="nav-link"
+      >
+        About
+      </a>
+
+    </nav>
+
+
+    <div class="topbar-actions">
+
+      <div class="live-clock" id="liveClock">
+        <span class="clock-dot"></span>
+        <span id="clockTime">--:--</span>
+      </div>
+
+
+      <button
+        type="button"
+        class="profile-button"
+        id="profileButton"
+        aria-label="Open profile"
+      >
+
+        <img
+          id="userAvatar"
+          src=""
+          alt="Your profile"
+          class="user-avatar"
+        >
+
+        <span
+          class="profile-name"
+          id="userDisplayName"
+        >
+          Loading...
+        </span>
+
+        <span class="profile-chevron">
+          ⌄
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="icon-button"
+        id="signOutButton"
+        aria-label="Sign out"
+        title="Sign out"
+      >
+        <span>↪</span>
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- =========================
+       MOBILE HEADER
+  ========================== -->
+  <div class="mobile-header">
+
+    <div>
+      <span class="mobile-page-label">
+        Accountability
+      </span>
+
+      <strong id="mobileUserName">
+        Winter Arc
+      </strong>
+    </div>
+
+
+    <button
+      type="button"
+      class="mobile-avatar-button"
+      id="mobileProfileButton"
+    >
+
+      <img
+        id="mobileUserAvatar"
+        src=""
+        alt="Profile"
+      >
+
+    </button>
+
+  </div>
+
+
+  <!-- =========================
+       MAIN CONTENT
+  ========================== -->
+  <main class="friend-main">
+
+
+    <!-- =========================
+         PAGE HERO
+    ========================== -->
+    <section class="friend-hero">
+
+      <div class="friend-hero-copy">
+
+        <span class="eyebrow">
+          ACCOUNTABILITY
+        </span>
+
+        <h1>
+          Winter Arc is better
+          <span>with your crew.</span>
+        </h1>
+
+        <p>
+          Add as many friends as you want. Each one gets their own dashboard, and you can compare everyone side by side.
+        </p>
+
+      </div>
+
+
+      <div class="friend-hero-icon">
+        <span>♧</span>
+      </div>
+
+    </section>
+
+
+    <!-- FRIEND TABS -->
+    <div class="friend-tabs-bar">
+      <div class="friend-tabs" id="friendTabs" hidden></div>
+      <span class="friend-count-label" id="friendCountLabel">0 of 10 friends</span>
+    </div>
+
+    <!-- COMPARE (Everyone) -->
+    <section id="friendCompareSection" hidden>
+      <section class="dashboard-card leaderboard-card">
+        <div class="card-header">
+          <div>
+            <span class="section-kicker">LEADERBOARD</span>
+            <h2>Everyone, ranked</h2>
+            <p>Ranked by today's progress, then streak.</p>
+          </div>
+        </div>
+        <div class="leaderboard-list" id="leaderboardList"></div>
+      </section>
+      <div class="compare-grid" id="compareGrid"></div>
+    </section>
+
+    
+
+
+    <!-- =========================
+         ACCOUNTABILITY MESSAGE
+    ========================== -->
+
+    <!-- ADD FRIEND + REQUESTS -->
+    <section
+      class="dashboard-card friend-connect-card"
+      id="friendConnectSection"
+    >
+
+      <div class="card-header">
+
+        <div>
+
+          <span class="section-kicker">
+            CONNECT
+          </span>
+
+          <h2>
+            Add a friend
+          </h2>
+
+          <p>
+            Enter their exact Winter Arc username. You can add up to 10 friends.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <form
+        class="friend-search-form"
+        id="friendRequestForm"
+      >
+
+        <div class="username-input-wrapper">
+
+          <span class="username-prefix">
+            @
+          </span>
+
+          <input
+            type="text"
+            id="friendUsernameInput"
+            name="friendUsername"
+            placeholder="username"
+            autocomplete="off"
+            maxlength="30"
+            required
+          >
+
+        </div>
+
+
+        <button
+          type="submit"
+          class="primary-button"
+          id="sendFriendRequestButton"
+        >
+          Send Request
+        </button>
+
+      </form>
+
+
+      <div
+        class="friend-search-message"
+        id="friendSearchMessage"
+        hidden
+      ></div>
+
+
+      <!-- =========================
+           REQUESTS
+      ========================== -->
+      <div class="requests-section">
+
+        <div class="requests-heading">
+
+          <div>
+            <span class="section-kicker">
+              REQUESTS
+            </span>
+
+            <h3>
+              Friend Requests
+            </h3>
+          </div>
+
+          <span
+            class="request-count"
+            id="requestCount"
+          >
+            0
+          </span>
+
+        </div>
+
+
+        <div
+          class="requests-list"
+          id="requestsList"
+        >
+          <!-- Generated by app.js -->
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         FRIEND DASHBOARD
+    ====================================================== -->
+    <section
+      id="friendDashboardSection"
+      hidden
+    >
+
+
+      <!-- =========================
+           FRIEND PROFILE HEADER
+      ========================== -->
+      <section class="friend-profile-banner">
+
+        <div class="friend-profile-main">
+
+          <div class="friend-avatar-wrapper">
+
+            <img
+              id="friendPageAvatar"
+              src=""
+              alt="Friend profile"
+              class="friend-page-avatar"
+            >
+
+            <span
+              class="friend-status-dot"
+              id="friendStatusDot"
+            ></span>
+
+          </div>
+
+
+          <div class="friend-page-identity">
+
+            <span class="section-kicker">
+              YOUR ACCOUNTABILITY PARTNER
+            </span>
+
+            <h1 id="friendPageName">
+              Friend
+            </h1>
+
+            <span id="friendPageUsername">
+              @username
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="friend-page-actions">
+
+          <span
+            class="friend-online-label"
+            id="friendOnlineLabel"
+          >
+            Offline
+          </span>
+
+          <button
+            type="button"
+            class="secondary-button"
+            id="removeFriendButton"
+          >
+            Remove Friend
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           FRIEND STATS
+      ========================== -->
+      <section
+        class="stats-grid friend-stats-grid"
+        aria-label="Friend statistics"
+      >
+
+        <article class="stat-card">
+
+          <div class="stat-icon">
+            🔥
+          </div>
+
+          <div class="stat-info">
+
+            <span class="stat-label">
+              Current Streak
+            </span>
+
+            <strong id="friendPageStreak">
+              0
+            </strong>
+
+            <small>
+              days
+            </small>
+
+          </div>
+
+        </article>
+
+
+        <article class="stat-card">
+
+          <div class="stat-icon">
+            ✓
+          </div>
+
+          <div class="stat-info">
+
+            <span class="stat-label">
+              Today's Progress
+            </span>
+
+            <strong id="friendPageTodayPercent">
+              0%
+            </strong>
+
+            <small>
+              completed
+            </small>
+
+          </div>
+
+        </article>
+
+
+        <article class="stat-card">
+
+          <div class="stat-icon">
+            ◷
+          </div>
+
+          <div class="stat-info">
+
+            <span class="stat-label">
+              Days Completed
+            </span>
+
+            <strong id="friendPageCompletedDays">
+              0
+            </strong>
+
+            <small>
+              of 90
+            </small>
+
+          </div>
+
+        </article>
+
+
+        <article class="stat-card">
+
+          <div class="stat-icon">
+            ★
+          </div>
+
+          <div class="stat-info">
+
+            <span class="stat-label">
+              Overall Progress
+            </span>
+
+            <strong id="friendPageOverallPercent">
+              0%
+            </strong>
+
+            <small>
+              90 day arc
+            </small>
+
+          </div>
+
+        </article>
+
+      </section>
+
+
+      <!-- =========================
+           FRIEND TODAY
+      ========================== -->
+      <section class="dashboard-card friend-today-card">
+
+        <div class="card-header">
+
+          <div>
+
+            <span class="section-kicker">
+              TODAY
+            </span>
+
+            <h2>
+              Today's Progress
+            </h2>
+
+            <p id="friendTodayDate">
+              Loading date...
+            </p>
+
+          </div>
+
+          <div class="friend-read-only-badge">
+            READ ONLY
+          </div>
+
+        </div>
+
+
+        <div
+          class="friend-activities-list"
+          id="friendActivitiesList"
+        >
+          <!-- Generated by app.js -->
+        </div>
+
+
+        <div class="friend-total-progress">
+
+          <div class="friend-total-progress-header">
+
+            <span>
+              Daily completion
+            </span>
+
+            <strong id="friendDailyProgressText">
+              0%
+            </strong>
+
+          </div>
+
+
+          <div class="progress-track large">
+
+            <div
+              class="progress-fill"
+              id="friendDailyProgressBar"
+              style="width: 0%"
+            ></div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           FRIEND CALENDAR
+      ========================== -->
+      <section class="dashboard-card calendar-card friend-calendar-card">
+
+        <div class="card-header calendar-header">
+
+          <div>
+
+            <span class="section-kicker">
+              HISTORY
+            </span>
+
+            <h2>
+              Friend's 90-Day Calendar
+            </h2>
+
+            <p>
+              View their Winter Arc journey.
+            </p>
+
+          </div>
+
+
+          <div class="friend-read-only-badge">
+            READ ONLY
+          </div>
+
+        </div>
+
+
+        <div class="calendar-weekdays">
+
+          <span>Sun</span>
+          <span>Mon</span>
+          <span>Tue</span>
+          <span>Wed</span>
+          <span>Thu</span>
+          <span>Fri</span>
+          <span>Sat</span>
+
+        </div>
+
+
+        <div
+          class="calendar-grid friend-calendar-grid"
+          id="friendCalendarGrid"
+        >
+          <!-- Generated by app.js -->
+        </div>
+
+
+        <div class="calendar-hint">
+          Click any day to view your friend's progress.
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           FRIEND ANALYTICS
+      ========================== -->
+      <section class="analytics-section">
+
+        <div class="section-heading">
+
+          <div>
+
+            <span class="section-kicker">
+              ANALYTICS
+            </span>
+
+            <h2>
+              Friend's Progress
+            </h2>
+
+            <p>
+              A read-only view of their consistency.
+            </p>
+
+          </div>
+
+          <span class="analytics-period">
+            Last 7 days
+          </span>
+
+        </div>
+
+
+        <div class="analytics-grid">
+
+
+          <!-- WEEKLY PROGRESS -->
+          <article class="dashboard-card chart-card">
+
+            <div class="chart-header">
+
+              <div>
+
+                <span class="chart-label">
+                  DAILY COMPLETION
+                </span>
+
+                <h3>
+                  Weekly Progress
+                </h3>
+
+              </div>
+
+              <strong id="friendWeeklyAverage">
+                0%
+              </strong>
+
+            </div>
+
+
+            <div
+              class="bar-chart"
+              id="friendWeeklyChart"
+            >
+              <!-- Generated by app.js -->
+            </div>
+
+          </article>
+
+
+          <!-- ACTIVITY BREAKDOWN -->
+          <article class="dashboard-card chart-card">
+
+            <div class="chart-header">
+
+              <div>
+
+                <span class="chart-label">
+                  ACTIVITY BREAKDOWN
+                </span>
+
+                <h3>
+                  Consistency
+                </h3>
+
+              </div>
+
+              <strong id="friendActivityAverage">
+                0%
+              </strong>
+
+            </div>
+
+
+            <div
+              class="activity-chart"
+              id="friendActivityChart"
+            >
+              <!-- Generated by app.js -->
+            </div>
+
+          </article>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           SELECTED FRIEND DAY
+      ========================== -->
+      <section
+        class="dashboard-card selected-day-card"
+        id="friendSelectedDayCard"
+        hidden
+      >
+
+        <div class="card-header">
+
+          <div>
+
+            <span class="section-kicker">
+              SELECTED DAY
+            </span>
+
+            <h2 id="friendSelectedDayTitle">
+              Day Progress
+            </h2>
+
+            <p id="friendSelectedDaySubtitle">
+              Friend's activity history.
+            </p>
+
+          </div>
+
+          <div class="friend-read-only-badge">
+            READ ONLY
+          </div>
+
+        </div>
+
+
+        <div
+          class="selected-day-activities"
+          id="friendSelectedDayActivities"
+        >
+          <!-- Generated by app.js -->
+        </div>
+
+      </section>
+
+    </section>
+
+    <section class="dashboard-quote">
+
+      <div class="quote-mark">
+        “
+      </div>
+
+      <p>
+        Keep each other accountable.
+        Celebrate the good days. Reset on the bad ones.
+      </p>
+
+      <span>
+        WINTER ARC · TOGETHER
+      </span>
+
+    </section>
+
+  </main>
+
+
+  <!-- =========================
+       MOBILE BOTTOM NAV
+  ========================== -->
+  <nav class="mobile-bottom-nav">
+
+    <a
+      href="dashboard.html"
+      class="mobile-nav-item"
+    >
+      <span>⌂</span>
+      <small>Dashboard</small>
+    </a>
+
+
+    <a
+      href="friend.html"
+      class="mobile-nav-item active"
+    >
+      <span>♧</span>
+      <small>Friends</small>
+    </a>
+
+
+    <a
+      href="about.html"
+      class="mobile-nav-item"
+    >
+      <span>ⓘ</span>
+      <small>About</small>
+    </a>
+
+
+    <button
+      type="button"
+      class="mobile-nav-item"
+      id="mobileSignOut"
+    >
+      <span>↪</span>
+      <small>Sign Out</small>
+    </button>
+
+  </nav>
+
+
+  <!-- =====================================================
+       PROFILE MODAL
+  ====================================================== -->
+  <div
+    class="modal-overlay"
+    id="profileModal"
+    hidden
+  >
+
+    <div
+      class="modal-card small-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="profileModalTitle"
+    >
+
+      <button
+        type="button"
+        class="modal-close"
+        data-close-modal="profileModal"
+        aria-label="Close"
+      >
+        ×
+      </button>
+
+
+      <div class="profile-modal-content">
+
+        <img
+          id="modalUserAvatar"
+          src=""
+          alt="Your profile"
+          class="large-avatar"
+        >
+
+        <span class="modal-kicker">
+          YOUR ACCOUNT
+        </span>
+
+        <h2 id="profileModalTitle">
+          Your Profile
+        </h2>
+
+        <strong id="modalUserName">
+          Loading...
+        </strong>
+
+        <span id="modalUsername">
+          @username
+        </span>
+
+        <span id="modalUserEmail">
+          user@example.com
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       REMOVE FRIEND MODAL
+  ====================================================== -->
+  <div
+    class="modal-overlay"
+    id="removeFriendModal"
+    hidden
+  >
+
+    <div
+      class="modal-card small-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="removeFriendModalTitle"
+    >
+
+      <button
+        type="button"
+        class="modal-close"
+        data-close-modal="removeFriendModal"
+        aria-label="Close"
+      >
+        ×
+      </button>
+
+
+      <div class="delete-modal-icon">
+        ×
+      </div>
+
+      <span class="modal-kicker">
+        ACCOUNTABILITY
+      </span>
+
+      <h2 id="removeFriendModalTitle">
+        Remove this friend?
+      </h2>
+
+      <p>
+        You will no longer be able to view each other's Winter Arc
+        dashboard.
+      </p>
+
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="secondary-button"
+          data-close-modal="removeFriendModal"
+        >
+          Keep Friend
+        </button>
+
+        <button
+          type="button"
+          class="danger-button"
+          id="confirmRemoveFriendButton"
+        >
+          Remove
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       FRIEND DAY VIEW MODAL
+  ====================================================== -->
+  <div
+    class="modal-overlay"
+    id="friendDayModal"
+    hidden
+  >
+
+    <div
+      class="modal-card day-modal-card"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="friendDayModalTitle"
+    >
+
+      <button
+        type="button"
+        class="modal-close"
+        data-close-modal="friendDayModal"
+        aria-label="Close"
+      >
+        ×
+      </button>
+
+
+      <div class="modal-header">
+
+        <span class="modal-kicker">
+          FRIEND PROGRESS
+        </span>
+
+        <h2 id="friendDayModalTitle">
+          Day Progress
+        </h2>
+
+        <p id="friendDayModalDate">
+          View completed activities.
+        </p>
+
+      </div>
+
+
+      <div
+        class="day-editor-list friend-day-view-list"
+        id="friendDayViewList"
+      >
+        <!-- Generated by app.js -->
+      </div>
+
+
+      <div class="modal-actions">
+
+        <button
+          type="button"
+          class="secondary-button"
+          data-close-modal="friendDayModal"
+        >
+          Close
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       TOAST NOTIFICATIONS
+  ====================================================== -->
+  <div
+    class="toast-container"
+    id="toastContainer"
+    aria-live="polite"
+    aria-atomic="true"
+  ></div>
+
+
+  <!-- =====================================================
+       LOADING OVERLAY
+  ====================================================== -->
+  <div
+    class="page-loader"
+    id="pageLoader"
+  >
+
+    <div class="loader-spinner"></div>
+
+    <span>
+      Loading friend dashboard...
+    </span>
+
+  </div>
+
+
+</body>
+</html>
