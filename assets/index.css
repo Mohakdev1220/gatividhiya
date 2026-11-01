@@ -1303,3 +1303,22 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 .date-nav-btn:active {
     transform: scale(0.95);
 }
+
+/* Light mode */
+#taskList .item.done {
+    background: rgba(100, 116, 139, 0.10);
+    border-color: rgba(100, 116, 139, 0.25);
+    border-left: 4px solid #64748b;
+    opacity: 0.85;
+    transition: background 0.25s ease,
+                border-color 0.25s ease,
+                opacity 0.25s ease;
+}
+
+/* Dark mode */
+[data-theme="dark"] #taskList .item.done {
+    background: rgba(148, 163, 184, 0.12);
+    border-color: rgba(148, 163, 184, 0.22);
+    border-left: 4px solid #94a3b8;
+    opacity: 0.9;
+}
