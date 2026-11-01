@@ -435,65 +435,184 @@ function renderTasks() {
     const calEl = document.getElementById("calInput");
     const date = calEl?.value || todayKey();
     const month = monthKeyFromDateKey(date);
-    
-    populateTimerSelect(); // Sync Timer dropdown
 
-    let tasksForMonth = state.tasks.filter(t => t.month === month);
+    // Keep the focus timer's activity dropdown updated.
+    populateTimerSelect();
+
+    // Get activities belonging to the selected month.
+    let tasksForMonth = state.tasks.filter(
+        task => task.month === month
+    );
+
+    // Apply the selected category filter.
     if (activeCategoryFilter !== "All") {
-        tasksForMonth = tasksForMonth.filter(t => (t.category || "General") === activeCategoryFilter);
+        tasksForMonth = tasksForMonth.filter(
+            task => (task.category || "General") === activeCategoryFilter
+        );
     }
 
+    // Pending activities first; completed activities last.
+    // Completion is specific to the currently selected date.
+    tasksForMonth.sort((a, b) => {
+        const aDone = getTaskLogData(date, a.id).completed;
+        const bDone = getTaskLogData(date, b.id).completed;
+
+        return Number(aDone) - Number(bDone);
+    });
+
     list.innerHTML = "";
+
     if (tasksForMonth.length === 0) {
-        list.innerHTML = `<div class="card" style="grid-column: 1 / -1; text-align: center; color: var(--text-dim);">No activities found.</div>`;
+        list.innerHTML = `
+            <div class="card"
+                 style="grid-column: 1 / -1; text-align: center; color: var(--text-dim);">
+                No activities found.
+            </div>
+        `;
         return;
     }
 
-    tasksForMonth.forEach((task) => {
+    tasksForMonth.forEach(task => {
         const log = getTaskLogData(date, task.id);
         const isChecked = log.completed;
-        const monthChecks = countTaskChecksInMonth(task.id, month);
-        const progress = task.target > 0 ? Math.min(100, Math.round((monthChecks / task.target) * 100)) : 0;
+
+        const monthChecks = countTaskChecksInMonth(
+            task.id,
+            month
+        );
+
+        const progress = task.target > 0
+            ? Math.min(
+                100,
+                Math.round((monthChecks / task.target) * 100)
+            )
+            : 0;
+
         const cat = task.category || "General";
 
         const item = document.createElement("div");
-        item.className = "item";
+
+        // Add the done class when the activity is completed.
+        item.className = isChecked ? "item done" : "item";
 
         let logPills = "";
-        if (log.durationMinutes) logPills += `<span class="time-pill">⏱️ ${log.durationMinutes}m</span>`;
-        if (log.notes) logPills += `<span class="note-pill" title="${escapeHtml(log.notes)}">📝 Note</span>`;
+
+        if (log.durationMinutes) {
+            logPills += `
+                <span class="time-pill">
+                    ⏱️ ${log.durationMinutes}m
+                </span>
+            `;
+        }
+
+        if (log.notes) {
+            logPills += `
+                <span class="note-pill"
+                      title="${escapeHtml(log.notes)}">
+                    📝 Note
+                </span>
+            `;
+        }
 
         item.innerHTML = `
             <div style="min-width:0; flex:1;">
-                <div style="font-weight:800; font-size:1rem; margin-bottom:6px; word-break:break-word;">
+                <div style="
+                    font-weight:800;
+                    font-size:1rem;
+                    margin-bottom:6px;
+                    word-break:break-word;
+                ">
                     ${escapeHtml(task.name)}
-                    <span class="cat-badge cat-${cat}">${cat}</span>
+                    <span class="cat-badge cat-${escapeHtml(cat)}">
+                        ${escapeHtml(cat)}
+                    </span>
                 </div>
-                <div style="font-size:0.8rem; color: var(--text-dim); margin-bottom:8px;">
+
+                <div style="
+                    font-size:0.8rem;
+                    color:var(--text-dim);
+                    margin-bottom:8px;
+                ">
                     ${monthChecks}/${task.target} days this month
                 </div>
-                <div style="height:6px; background: var(--bg); border-radius:999px; overflow:hidden; max-width:220px;">
-                    <div style="height:100%; width:${progress}%; background: var(--success); border-radius:999px;"></div>
+
+                <div style="
+                    height:6px;
+                    background:var(--bg);
+                    border-radius:999px;
+                    overflow:hidden;
+                    max-width:220px;
+                ">
+                    <div style="
+                        height:100%;
+                        width:${progress}%;
+                        background:var(--success);
+                        border-radius:999px;
+                    "></div>
                 </div>
-                <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
-                    <button type="button" onclick="openEditModal(${task.id})" style="padding:6px 10px; border:none; border-radius:999px; background:rgba(59,130,246,0.15); color:var(--accent); font-weight:800; cursor:pointer;">Edit</button>
-                    <button type="button" onclick="openDeleteModal(${task.id})" style="padding:6px 10px; border:none; border-radius:999px; background:rgba(239,68,68,0.14); color:var(--danger); font-weight:800; cursor:pointer;">Delete</button>
+
+                <div style="
+                    display:flex;
+                    gap:8px;
+                    margin-top:10px;
+                    flex-wrap:wrap;
+                ">
+                    <button
+                        type="button"
+                        onclick="openEditModal(${Number(task.id)})"
+                        style="
+                            padding:6px 10px;
+                            border:none;
+                            border-radius:999px;
+                            background:rgba(59,130,246,0.15);
+                            color:var(--accent);
+                            font-weight:800;
+                            cursor:pointer;
+                        "
+                    >
+                        Edit
+                    </button>
+
+                    <button
+                        type="button"
+                        onclick="openDeleteModal(${Number(task.id)})"
+                        style="
+                            padding:6px 10px;
+                            border:none;
+                            border-radius:999px;
+                            background:rgba(239,68,68,0.14);
+                            color:var(--danger);
+                            font-weight:800;
+                            cursor:pointer;
+                        "
+                    >
+                        Delete
+                    </button>
+
                     ${logPills}
                 </div>
             </div>
+
             <label class="switch" title="Mark done">
-                <input type="checkbox" ${isChecked ? "checked" : ""} onchange="toggleTask(${task.id})">
+                <input
+                    type="checkbox"
+                    ${isChecked ? "checked" : ""}
+                    onchange="toggleTask(${Number(task.id)})"
+                >
                 <span class="slider"></span>
             </label>
         `;
+
         list.appendChild(item);
     });
 }
+
 
 window.refreshUI = function () {
     renderTasks();
     if (isStatsVisible()) renderStats();
 };
+
 
 /* ---------- Charts & Heatmap ---------- */
 let lineChart = null, pieChart = null;
