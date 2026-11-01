@@ -993,6 +993,14 @@ input:checked + .slider::before {
   border-radius: var(--radius);
   padding: 14px;
 }
+
+.activity-reminder {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #d97706;
+}
 .month-activity-name { font-weight: 800; font-size: 0.95rem; margin-bottom: 4px; word-break: break-word; }
 .month-activity-meta { font-size: 0.82rem; color: var(--text-2); }
 
@@ -1303,7 +1311,6 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 .date-nav-btn:active {
     transform: scale(0.95);
 }
-
 /* Light mode */
 #taskList .item.done {
     background: rgba(100, 116, 139, 0.10);
@@ -1321,4 +1328,32 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     border-color: rgba(148, 163, 184, 0.22);
     border-left: 4px solid #94a3b8;
     opacity: 0.9;
+}
+
+.task-view-switch {
+    display: flex;
+    gap: 5px;
+    padding: 5px;
+    margin-bottom: 16px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.task-view-switch button {
+    flex: 1;
+    padding: 11px;
+    border: none;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--text-dim);
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.task-view-switch button.active {
+    background: var(--card);
+    color: var(--accent);
+    box-shadow: 0 2px 7px rgba(0,0,0,0.08);
 }
