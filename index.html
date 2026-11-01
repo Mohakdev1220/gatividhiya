@@ -123,23 +123,74 @@
 </a>
 
 <style>
-  .winter-arc-btn {
-    display: block;
-    width: fit-content;
-    margin: 20px auto;
-    padding: 12px 22px;
-    background: #111;
-    color: #fff;
-    text-decoration: none;
-    font-weight: 600;
-    border-radius: 10px;
-    transition: 0.2s ease;
-  }
+ .winter-arc-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-  .winter-arc-btn:hover {
+    width: fit-content;
+    margin: 22px auto;
+    padding: 13px 25px;
+
+    background: #eaf3ff;
+    color: #183b63;
+
+    border: 1px solid #c9ddf5;
+    border-radius: 12px;
+
+    font-size: 14px;
+    font-weight: 750;
+    letter-spacing: 0.2px;
+    text-decoration: none;
+
+    box-shadow: 0 3px 12px rgba(50, 100, 160, 0.08);
+
+    transition: all 0.22s ease;
+}
+
+/* Hover */
+.winter-arc-btn:hover {
+    background: #dcecff;
+    border-color: #9fc5ef;
+    box-shadow: 0 6px 20px rgba(50, 100, 160, 0.16);
     transform: translateY(-2px);
-    background: #222;
-  }
+}
+
+/* Click */
+.winter-arc-btn:active {
+    transform: scale(0.98);
+}
+
+/* Dark mode */
+[data-theme="dark"] .winter-arc-btn {
+    background: #182638;
+    color: #c6e1ff;
+    border-color: #304b68;
+    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .winter-arc-btn:hover {
+    background: #20364e;
+    border-color: #52799f;
+    box-shadow: 0 5px 20px rgba(74, 144, 226, 0.13);
+}
+
+/* Keyboard accessibility */
+.winter-arc-btn:focus-visible {
+    outline: 2px solid #60a5fa;
+    outline-offset: 4px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .winter-arc-btn {
+        transition: none;
+    }
+    .winter-arc-btn:hover,
+    .winter-arc-btn:active {
+        transform: none;
+    }
+}
 </style>
 
 <!-- ============================================================
@@ -148,7 +199,7 @@
 <nav class="top-nav" role="navigation" aria-label="Main navigation">
   <div class="logo">
     Gatividhi Tracker
-    <span>by Toolify</span>
+    <span>by Mohak Choubey</span>
   </div>
 
   <div id="auth-ui">
