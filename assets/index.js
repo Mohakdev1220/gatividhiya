@@ -97,6 +97,12 @@ function escapeHtml(str) {
         .replace(/'/g, "&#039;");
 }
 
+// Turn a category name into a CSS-safe class suffix ("Self Care" -> "Self_Care").
+function catClass(cat) {
+    const slug = String(cat || "General").trim().replace(/[^a-zA-Z0-9_-]+/g, "_");
+    return slug || "General";
+}
+
 function setThemeOnDocument() {
     const theme = state.theme === "light" ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", theme);
@@ -428,9 +434,36 @@ function countCompletedTasksForDate(dateKey) {
     return Object.values(dateLogs).filter(isEntryCompleted).length;
 }
 
+let activeTaskView = "incomplete";
 function renderTasks() {
     const list = document.getElementById("taskList");
     if (!list) return;
+
+    // Create the Incomplete / Done switch.
+let viewSwitch = document.getElementById("taskViewSwitch");
+
+if (!viewSwitch) {
+    viewSwitch = document.createElement("div");
+    viewSwitch.id = "taskViewSwitch";
+    list.parentNode.insertBefore(viewSwitch, list);
+}
+
+viewSwitch.innerHTML = `
+    <div class="task-view-switch">
+        <button
+            class="${activeTaskView === "incomplete" ? "active" : ""}"
+            onclick="window.setTaskView('incomplete')">
+            Incomplete
+        </button>
+
+        <button
+            class="${activeTaskView === "done" ? "active" : ""}"
+            onclick="window.setTaskView('done')">
+            Done
+        </button>
+    </div>
+`;
+
 
     const calEl = document.getElementById("calInput");
     const date = calEl?.value || todayKey();
@@ -444,6 +477,8 @@ function renderTasks() {
         task => task.month === month
     );
 
+    
+
     // Apply the selected category filter.
     if (activeCategoryFilter !== "All") {
         tasksForMonth = tasksForMonth.filter(
@@ -451,14 +486,28 @@ function renderTasks() {
         );
     }
 
-    // Pending activities first; completed activities last.
-    // Completion is specific to the currently selected date.
-    tasksForMonth.sort((a, b) => {
-        const aDone = getTaskLogData(date, a.id).completed;
-        const bDone = getTaskLogData(date, b.id).completed;
+  // Show only activities belonging to the selected view.
+tasksForMonth = tasksForMonth.filter(task => {
+    const completed = !!getTaskLogData(date, task.id).completed;
 
-        return Number(aDone) - Number(bDone);
-    });
+    return activeTaskView === "done"
+        ? completed
+        : !completed;
+});
+
+
+
+// Sort activities: longer target first.
+// Keep original task order when targets are equal.
+tasksForMonth.sort((a, b) => {
+    const aDays = Math.max(0, Number(a.target) || 0);
+    const bDays = Math.max(0, Number(b.target) || 0);
+
+    // Longer target first. Array.prototype.sort is stable, so tasks with the
+    // same target keep the order they were created in.
+    return bDays - aDays;
+});
+
 
     list.innerHTML = "";
 
@@ -479,7 +528,23 @@ function renderTasks() {
         const monthChecks = countTaskChecksInMonth(
             task.id,
             month
-        );
+         );
+       
+
+        const [year, monthNumber] = date.split("-").map(Number);
+
+const daysInMonth = new Date(
+    year,
+    monthNumber,
+    0
+).getDate();
+
+const reminderHTML = (
+    Number(task.target) >= daysInMonth && !isChecked
+)
+    ? `<span class="activity-reminder">Don't forget ⚠</span>`
+    : "";
+
 
         const progress = task.target > 0
             ? Math.min(
@@ -522,10 +587,13 @@ function renderTasks() {
                     margin-bottom:6px;
                     word-break:break-word;
                 ">
-                    ${escapeHtml(task.name)}
-                    <span class="cat-badge cat-${escapeHtml(cat)}">
-                        ${escapeHtml(cat)}
-                    </span>
+                    ${reminderHTML}
+                    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                        <span>${escapeHtml(task.name)}</span>
+                        <span class="cat-badge cat-${catClass(cat)}">
+                            ${escapeHtml(cat)}
+                        </span>
+                    </div>
                 </div>
 
                 <div style="
@@ -607,12 +675,10 @@ function renderTasks() {
     });
 }
 
-
 window.refreshUI = function () {
     renderTasks();
     if (isStatsVisible()) renderStats();
 };
-
 
 /* ---------- Charts & Heatmap ---------- */
 let lineChart = null, pieChart = null;
@@ -1039,4 +1105,9 @@ document.addEventListener("DOMContentLoaded", () => {
     startClock();
     bindModalButtons();
     renderTasks();
-});
+}); 
+
+window.setTaskView = function(view) {
+    activeTaskView = view === "done" ? "done" : "incomplete";
+    renderTasks();
+};
