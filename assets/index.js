@@ -206,6 +206,98 @@ function listenToCloud(user) {
 }
 
 /* ---------- Auth ---------- */
+/* ---------- Google Auth Loading Screen ---------- */
+
+function ensureAuthLoadingUI() {
+    if (document.getElementById("authLoadingScreen")) return;
+
+    const style = document.createElement("style");
+    style.id = "authLoadingStyles";
+    style.textContent = `
+        #authLoadingScreen {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 14px;
+            background: var(--bg, #0f172a);
+            color: var(--text, #ffffff);
+            font-family: inherit;
+            text-align: center;
+            padding: 24px;
+        }
+
+        #authLoadingScreen.visible {
+            display: flex;
+        }
+
+        #authLoadingScreen .auth-loading-spinner {
+            width: 38px;
+            height: 38px;
+            border: 4px solid rgba(128, 128, 128, 0.25);
+            border-top-color: var(--accent, #3b82f6);
+            border-radius: 50%;
+            animation: authLoadingSpin 0.8s linear infinite;
+        }
+
+        #authLoadingScreen .auth-loading-message {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        @keyframes authLoadingSpin {
+            to { transform: rotate(360deg); }
+        }
+
+        .task-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 22px;
+            height: 22px;
+            padding: 0 6px;
+            margin-left: 5px;
+            border-radius: 999px;
+            background: rgba(128, 128, 128, 0.18);
+            font-size: 0.75rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+    `;
+    document.head.appendChild(style);
+
+    const overlay = document.createElement("div");
+    overlay.id = "authLoadingScreen";
+    overlay.setAttribute("role", "status");
+    overlay.setAttribute("aria-live", "polite");
+    overlay.innerHTML = `
+        <div class="auth-loading-spinner" aria-hidden="true"></div>
+        <div class="auth-loading-message">
+            Checking your Google account...
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+}
+
+function showAuthLoading(message = "Loading your activities...") {
+    ensureAuthLoadingUI();
+
+    const overlay = document.getElementById("authLoadingScreen");
+    const messageEl = overlay?.querySelector(".auth-loading-message");
+
+    if (messageEl) messageEl.textContent = message;
+    overlay?.classList.add("visible");
+}
+
+function hideAuthLoading() {
+    document.getElementById("authLoadingScreen")
+        ?.classList.remove("visible");
+}
+
 function setAuthUI(user) {
     const loginBtn = document.getElementById("login-btn");
     const userInfo = document.getElementById("user-info");
@@ -233,27 +325,59 @@ function setAuthUI(user) {
 }
 
 auth.onAuthStateChanged(async (user) => {
-    setAuthUI(user);
     if (user) {
-        try { await user.reload(); } catch {}
-        await loadFromCloud(user);
-        listenToCloud(user);
-    } else if (unsubscribeCloud) {
-        unsubscribeCloud();
-        unsubscribeCloud = null;
+        showAuthLoading("Loading your Google account...");
+
+        try {
+            try {
+                await user.reload();
+            } catch (error) {
+                console.warn("Could not refresh user profile:", error);
+            }
+
+            setAuthUI(auth.currentUser || user);
+
+            showAuthLoading("Loading your activities...");
+            await loadFromCloud(auth.currentUser || user);
+
+            listenToCloud(auth.currentUser || user);
+        } catch (error) {
+            console.error("Authentication initialization error:", error);
+        } finally {
+            hideAuthLoading();
+        }
+    } else {
+        setAuthUI(null);
+
+        if (unsubscribeCloud) {
+            unsubscribeCloud();
+            unsubscribeCloud = null;
+        }
+
+        // Local mode remains available without Google authentication.
+        hideAuthLoading();
     }
 });
 
 window.handleLogin = async function () {
+    showAuthLoading("Connecting to Google...");
+
     try {
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.addScope("email");
         provider.addScope("profile");
         provider.setCustomParameters({ prompt: "select_account" });
-        const res = await auth.signInWithPopup(provider);
-        if (res.user) try { await res.user.reload(); } catch {}
-    } catch (e) {
-        console.error("Login error:", e);
+
+        await auth.signInWithPopup(provider);
+
+        // The auth-state listener loads cloud data and hides the screen.
+    } catch (error) {
+        console.error("Login error:", error);
+        hideAuthLoading();
+
+        if (error.code !== "auth/popup-closed-by-user") {
+            alert("Google sign-in failed. Please try again.");
+        }
     }
 };
 
@@ -439,35 +563,56 @@ function renderTasks() {
     const list = document.getElementById("taskList");
     if (!list) return;
 
-    // Create the Incomplete / Done switch.
-let viewSwitch = document.getElementById("taskViewSwitch");
-
-if (!viewSwitch) {
-    viewSwitch = document.createElement("div");
-    viewSwitch.id = "taskViewSwitch";
-    list.parentNode.insertBefore(viewSwitch, list);
-}
-
-viewSwitch.innerHTML = `
-    <div class="task-view-switch">
-        <button
-            class="${activeTaskView === "incomplete" ? "active" : ""}"
-            onclick="window.setTaskView('incomplete')">
-            Incomplete
-        </button>
-
-        <button
-            class="${activeTaskView === "done" ? "active" : ""}"
-            onclick="window.setTaskView('done')">
-            Done
-        </button>
-    </div>
-`;
-
-
+       // Create the Incomplete / Done switch with live task counts.
     const calEl = document.getElementById("calInput");
     const date = calEl?.value || todayKey();
     const month = monthKeyFromDateKey(date);
+
+    let viewSwitch = document.getElementById("taskViewSwitch");
+
+    if (!viewSwitch) {
+        viewSwitch = document.createElement("div");
+        viewSwitch.id = "taskViewSwitch";
+        list.parentNode.insertBefore(viewSwitch, list);
+    }
+
+    // Count both views independently of the currently selected view.
+    let countableTasks = state.tasks.filter(task => task.month === month);
+
+    if (activeCategoryFilter !== "All") {
+        countableTasks = countableTasks.filter(
+            task => (task.category || "General") === activeCategoryFilter
+        );
+    }
+
+    const incompleteCount = countableTasks.filter(
+        task => !getTaskLogData(date, task.id).completed
+    ).length;
+
+    const doneCount = countableTasks.filter(
+        task => getTaskLogData(date, task.id).completed
+    ).length;
+
+    viewSwitch.innerHTML = `
+        <div class="task-view-switch">
+            <button
+                class="${activeTaskView === "incomplete" ? "active" : ""}"
+                onclick="window.setTaskView('incomplete')">
+                Incomplete
+                <span class="task-count">${incompleteCount}</span>
+            </button>
+
+            <button
+                class="${activeTaskView === "done" ? "active" : ""}"
+                onclick="window.setTaskView('done')">
+                Done
+                <span class="task-count">${doneCount}</span>
+            </button>
+        </div>
+    `;
+
+
+    
 
     // Keep the focus timer's activity dropdown updated.
     populateTimerSelect();
@@ -499,14 +644,13 @@ tasksForMonth = tasksForMonth.filter(task => {
 
 // Sort activities: longer target first.
 // Keep original task order when targets are equal.
-tasksForMonth.sort((a, b) => {
-    const aDays = Math.max(0, Number(a.target) || 0);
-    const bDays = Math.max(0, Number(b.target) || 0);
-
-    // Longer target first. Array.prototype.sort is stable, so tasks with the
-    // same target keep the order they were created in.
-    return bDays - aDays;
-});
+    // Sort longer-duration activities first.
+    // JavaScript's stable sort preserves the existing order for ties.
+    tasksForMonth.sort((a, b) => {
+        const aDays = Math.max(0, Number(a.target) || 0);
+        const bDays = Math.max(0, Number(b.target) || 0);
+        return bDays - aDays;
+    });
 
 
     list.innerHTML = "";
