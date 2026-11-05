@@ -1,1414 +1,543 @@
-/* ================================================================
-   Track — Design System
-   ================================================================ */
+<html lang="en" class="booting">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>html.booting body > :not(#authLoadingScreen) { visibility: hidden; }</style>
 
-/* ---------- Tokens ---------- */
-:root {
-  --bg:          #09090b;
-  --surface:     #131316;
-  --surface-2:   #1c1c20;
-  --border:      #27272a;
-  --border-2:    #3f3f46;
+  <!-- Primary SEO -->
+  <title>  Track | Daily Activity & Productivity Tracker</title>
 
-  --accent:      #6366f1;
-  --accent-dim:  rgba(99,102,241,0.15);
-  --success:     #22c55e;
-  --success-dim: rgba(34,197,94,0.12);
-  --danger:      #f43f5e;
-  --danger-dim:  rgba(244,63,94,0.13);
-  --warn:        #f59e0b;
+  <meta name="description"
+    content="Track is a simple productivity and daily activity tracking tool. Track habits, learning, workouts, coding, reading, deep work sessions, goals and your daily consistency.">
 
-  --text:        #fafafa;
-  --text-2:      #a1a1aa;
-  --text-3:      #52525b;
+  <meta name="keywords"
+    content="Track mohaktools,activity tracker, daily activity tracker, productivity tracker, habit tracker, habit tracking app, daily habit tracker, goal tracker, consistency tracker, deep work timer, focus timer, productivity tool, study tracker, workout tracker, learning tracker, coding tracker, reading tracker, analytics tracker, daily productivity">
 
-  --radius-sm:   8px;
-  --radius:      14px;
-  --radius-lg:   20px;
-  --radius-xl:   28px;
+  <meta name="author" content="Mohak Choubey">
 
-  --shadow-sm:   0 1px 3px rgba(0,0,0,.4);
-  --shadow:      0 4px 16px rgba(0,0,0,.45);
-  --shadow-lg:   0 16px 40px rgba(0,0,0,.6);
+  <!-- Search Engine -->
+  <meta name="robots"
+    content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 
-  --modal-overlay: rgba(0,0,0,.75);
-  --cal-invert: invert(1);
+  <meta name="googlebot" content="index, follow">
 
-  --font: 'Plus Jakarta Sans', system-ui, sans-serif;
-  --font-mono: ui-monospace, 'JetBrains Mono', monospace;
-}
+  <!-- Theme -->
+  <meta name="theme-color" content="#09090b">
 
-[data-theme="light"] {
-  --bg:          #f8fafc;
-  --surface:     #ffffff;
-  --surface-2:   #f1f5f9;
-  --border:      #e2e8f0;
-  --border-2:    #cbd5e1;
+  <!-- Canonical -->
+  <link rel="canonical"
+    href="https://track.mohaktools.com">
 
-  --accent:      #4f46e5;
-  --accent-dim:  rgba(79,70,229,0.08);
-  --success:     #16a34a;
-  --success-dim: rgba(22,163,74,0.08);
-  --danger:      #e11d48;
-  --danger-dim:  rgba(225,29,72,0.08);
+  <!-- Language -->
+  <meta http-equiv="content-language" content="en">
+  <meta name="language" content="English">
 
-  --text:        #0f172a;
-  --text-2:      #475569;
-  --text-3:      #94a3b8;
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%236366f1'/%3E%3Cpath d='M16 16h32v10h-11v22h-10V26H16z' fill='%23ffffff'/%3E%3C/svg%3E">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
 
-  --shadow-sm:   0 1px 3px rgba(0,0,0,.08);
-  --shadow:      0 4px 16px rgba(0,0,0,.1);
-  --shadow-lg:   0 16px 40px rgba(0,0,0,.15);
+  <meta property="og:title"
+    content="Track | Daily Activity & Productivity Tracker">
 
-  --modal-overlay: rgba(15,23,42,.6);
-  --cal-invert: invert(0);
-}
+  <meta property="og:description"
+    content="Track your daily activities, habits, goals, deep work sessions and productivity with track.">
 
-/* ---------- Reset ---------- */
-*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta property="og:url"
+    content="https://track.mohaktools.com/">
 
-html {
-  scroll-behavior: smooth;
-  -webkit-text-size-adjust: 100%;
-}
+  <meta property="og:image"
+    content="https://track.mohaktools.com/icons/icon-192.png">
 
+  <meta property="og:image:alt"
+    content="track">
 
-html, body {
-  width: 100%;
-  overflow-x: hidden;
-}
+  <meta property="og:site_name"
+    content="track">
 
-body {
-  font-family: var(--font);
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.5;
-  min-height: 100dvh;
-  -webkit-font-smoothing: antialiased;
-}
+  <meta property="og:locale" content="en_IN">
 
-/* ---------- Typography ---------- */
-h1,h2,h3 { line-height: 1.25; font-weight: 800; }
-p         { color: var(--text-2); }
-button    { font-family: inherit; }
-input, select, textarea { font-family: inherit; }
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image">
 
-/* ---------- Scrollbar ---------- */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 99px; }
+  <meta name="twitter:title"
+    content="track | Daily Activity & Productivity Tracker">
 
-/* ================================================================
-   NAV
-   ================================================================ */
-.top-nav {
-  position: sticky;
-  top: 0;
-  z-index: 900;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 24px;
-  min-height: 60px;
-}
+  <meta name="twitter:description"
+    content="Track daily activities, habits, goals, focus sessions and productivity with track.">
 
-.logo {
-  font-weight: 800;
-  font-size: 1.05rem;
-  letter-spacing: -0.02em;
-  white-space: nowrap;
-}
-.logo span {
-  display: block;
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-top: 1px;
-}
+  <meta name="twitter:image"
+    content="https://track.mohaktools.com/icons/icon-192.png">
 
-/* Auth */
-#auth-ui {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-width: 0;
-}
+  <!-- Google Site Verification -->
+  <meta name="google-site-verification"
+    content="xrZFu5cpuycZgitIQWcRT0DmD7er9zSVNmzWktTYs10">
 
-#login-btn {
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  padding: 8px 18px;
-  border-radius: 99px;
-  font-weight: 700;
-  font-size: 0.78rem;
-  cursor: pointer;
-  letter-spacing: 0.02em;
-  transition: opacity .15s, transform .15s;
-  white-space: nowrap;
-}
-#login-btn:hover { opacity: .85; transform: translateY(-1px); }
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-#user-info {
-  display: none;
-  align-items: center;
-  gap: 8px;
-  background: var(--surface-2);
-  padding: 5px 10px 5px 6px;
-  border-radius: 99px;
-  border: 1px solid var(--border);
-  min-width: 0;
-  max-width: 260px;
-}
-#user-pic {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  border: 2px solid var(--accent);
-  flex-shrink: 0;
-  object-fit: cover;
-}
-#user-name {
-  font-size: 0.8rem;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 120px;
-}
-#logout-btn {
-  background: none;
-  border: none;
-  color: var(--danger);
-  font-size: 0.7rem;
-  font-weight: 700;
-  cursor: pointer;
-  padding-left: 8px;
-  border-left: 1px solid var(--border);
-  white-space: nowrap;
-}
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
 
-/* Clock */
-.time-box { text-align: right; white-space: nowrap; }
-#liveTime {
-  font-family: var(--font-mono);
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: var(--accent);
-  letter-spacing: 0.03em;
-}
-#liveDate {
-  font-size: 0.6rem;
-  font-weight: 700;
-  color: var(--text-3);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin-top: 1px;
-}
-
-/* ================================================================
-   LAYOUT
-   ================================================================ */
-.container {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 20px 20px 40px;
-}
-
-/* ================================================================
-   TABS + TOOLBAR
-   ================================================================ */
-.toolbar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
-.tabs {
-  display: flex;
-  gap: 4px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 4px;
-  flex-shrink: 0;
-}
-
-.tab {
-  padding: 8px 22px;
-  border-radius: calc(var(--radius) - 3px);
-  border: none;
-  background: transparent;
-  color: var(--text-2);
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 0.88rem;
-  transition: background .2s, color .2s;
-  white-space: nowrap;
-}
-.tab:hover  { color: var(--text); background: var(--surface-2); }
-.tab.active { background: var(--accent); color: #fff; }
-
-.toolbar-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-left: auto;
-}
-
-.icon-btn {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text-2);
-  padding: 8px 12px;
-  border-radius: var(--radius);
-  cursor: pointer;
-  font-size: 0.82rem;
-  font-weight: 700;
-  transition: border-color .15s, color .15s, background .15s;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-.icon-btn:hover {
-  border-color: var(--accent);
-  color: var(--text);
-  background: var(--accent-dim);
-}
-
-/* ================================================================
-   CARDS
-   ================================================================ */
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  margin-bottom: 16px;
-}
-
-/* ================================================================
-   QUICK-ADD CHIPS
-   ================================================================ */
-.section-label {
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-3);
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.section-label em {
-  color: var(--accent);
-  font-style: normal;
-  font-size: 0.65rem;
-  animation: blink 2s ease infinite;
-}
-@keyframes blink { 0%,100%{opacity:.4} 50%{opacity:1} }
-
-.chips-row {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 10px;
-  margin-bottom: 6px;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-.chips-row::-webkit-scrollbar { display: none; }
-
-.chip {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 7px 14px;
-  border-radius: 99px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: border-color .15s, background .15s, transform .1s;
-  color: var(--text-2);
-}
-.chip:hover {
-  border-color: var(--accent);
-  background: var(--accent-dim);
-  color: var(--text);
-  transform: translateY(-1px);
-}
-
-/* ================================================================
-   ENTRY FORM
-   ================================================================ */
-.entry-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 18px;
-  margin-bottom: 16px;
-}
-
-.entry-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 10px;
-}
-.entry-row-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.input-wrapper {
-  position: relative;
-  min-width: 0;
-}
-
-input, textarea {
-  width: 100%;
-  background: var(--bg);
-  color: var(--text);
-  border: 1px solid var(--border);
-  padding: 11px 40px 11px 13px;
-  border-radius: var(--radius);
-  outline: none;
-  font-size: 0.9rem;
-  font-weight: 600;
-  transition: border-color .2s;
-  min-width: 0;
-}
-input:focus, textarea:focus { border-color: var(--accent); }
-input::placeholder, textarea::placeholder { color: var(--text-3); font-weight: 500; }
-
-.clear-btn {
-  position: absolute;
-  right: 11px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-3);
-  cursor: pointer;
-  font-size: 1.1rem;
-  display: none;
-  line-height: 1;
-  transition: color .15s;
-}
-.clear-btn:hover { color: var(--danger); }
-input:not(:placeholder-shown) + .clear-btn { display: block; }
-
-.cat-select {
-  width: 100%;
-  background: var(--bg);
-  color: var(--text);
-  border: 1px solid var(--border);
-  padding: 11px 13px;
-  border-radius: var(--radius);
-  outline: none;
-  font-size: 0.9rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: border-color .2s;
-}
-.cat-select:focus { border-color: var(--accent); }
-
-.btn-add {
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius);
-  font-weight: 800;
-  font-size: 0.9rem;
-  cursor: pointer;
-  padding: 11px 20px;
-  transition: opacity .15s, transform .15s;
-  white-space: nowrap;
-  width: 100%;
-}
-.btn-add:hover  { opacity: .9; transform: translateY(-1px); }
-.btn-add:active { transform: scale(.97); }
-
-/* ================================================================
-   CALENDAR + FILTER BAR
-   ================================================================ */
-.date-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
-  flex-wrap: wrap;
-}
-
-input[type="date"] {
-  padding: 9px 13px;
-  padding-right: 13px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  font-size: 0.88rem;
-  font-weight: 700;
-  filter: var(--cal-invert) hue-rotate(180deg);
-  cursor: pointer;
-}
-[data-theme="light"] input[type="date"] { filter: none; }
-
-.cat-filter-bar {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  flex: 1;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-.cat-filter-bar::-webkit-scrollbar { display: none; }
-
-.cat-chip {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text-2);
-  padding: 7px 14px;
-  border-radius: 99px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all .15s;
-}
-.cat-chip:hover       { border-color: var(--accent); color: var(--text); }
-.cat-chip.active      { background: var(--accent); color: #fff; border-color: var(--accent); }
-
-/* ================================================================
-   TASK LIST
-   ================================================================ */
-.list-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-  gap: 12px;
-}
-
-.item {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 16px;
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
-  transition: border-color .2s, box-shadow .2s, transform .15s;
-  min-width: 0;
-}
-.item:hover {
-  border-color: var(--border-2);
-  box-shadow: var(--shadow-sm);
-  transform: translateY(-1px);
-}
-.item.done {
-  border-left: 3px solid var(--success);
-}
-.item-body { flex: 1; min-width: 0; }
-
-.item-name {
-  font-weight: 800;
-  font-size: 0.98rem;
-  margin-bottom: 5px;
-  word-break: break-word;
-  line-height: 1.3;
-}
-
-.item-meta {
-  font-size: 0.78rem;
-  color: var(--text-2);
-  margin-bottom: 8px;
-}
-
-.progress-track {
-  height: 5px;
-  background: var(--surface-2);
-  border-radius: 99px;
-  overflow: hidden;
-  max-width: 200px;
-  margin-bottom: 10px;
-}
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--accent), var(--success));
-  border-radius: 99px;
-  transition: width .4s ease;
-}
-
-.item-actions {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.act-btn {
-  padding: 4px 11px;
-  border: none;
-  border-radius: 99px;
-  font-size: 0.75rem;
-  font-weight: 800;
-  cursor: pointer;
-  transition: opacity .15s, transform .1s;
-}
-.act-btn:hover  { opacity: .8; transform: translateY(-1px); }
-.act-btn.edit   { background: var(--accent-dim); color: var(--accent); }
-.act-btn.del    { background: var(--danger-dim); color: var(--danger); }
-.act-btn.log    { background: var(--success-dim); color: var(--success); }
-
-/* Pills */
-.time-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  background: var(--success-dim);
-  color: var(--success);
-  padding: 3px 8px;
-  border-radius: 6px;
-}
-.note-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  background: var(--accent-dim);
-  color: var(--accent);
-  padding: 3px 8px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-/* Category badges */
-.cat-badge {
-  display: inline-block;
-  font-size: 0.62rem;
-  font-weight: 800;
-  padding: 2px 7px;
-  border-radius: 5px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  vertical-align: middle;
-  margin-left: 5px;
-}
-.cat-General  { background: rgba(161,161,170,.15); color: #a1a1aa; }
-.cat-Work     { background: rgba(99,102,241,.15);  color: #818cf8; }
-.cat-Learning { background: rgba(168,85,247,.15);  color: #c084fc; }
-.cat-Health   { background: rgba(34,197,94,.15);   color: #4ade80; }
-.cat-Personal { background: rgba(245,158,11,.15);  color: #fbbf24; }
-
-/* Toggle Switch */
-.switch {
-  position: relative;
-  width: 42px;
-  height: 23px;
-  flex-shrink: 0;
-  margin-top: 3px;
-}
-.switch input { opacity: 0; width: 0; height: 0; }
-.slider {
-  position: absolute;
-  inset: 0;
-  background: var(--surface-2);
-  border-radius: 99px;
-  cursor: pointer;
-  border: 1px solid var(--border);
-  transition: background .25s;
-}
-.slider::before {
-  content: "";
-  position: absolute;
-  width: 15px;
-  height: 15px;
-  left: 3px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: var(--text-3);
-  border-radius: 50%;
-  transition: transform .25s, background .25s;
-}
-input:checked + .slider { background: var(--success); border-color: var(--success); }
-input:checked + .slider::before {
-  transform: translateY(-50%) translateX(19px);
-  background: #fff;
-}
-
-/* ================================================================
-   FOCUS TIMER
-   ================================================================ */
-.timer-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 22px;
-  margin-bottom: 16px;
-  position: relative;
-  overflow: hidden;
-}
-.timer-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at top right, rgba(99,102,241,.08), transparent 60%);
-  pointer-events: none;
-}
-
-[data-theme="light"] .timer-card {
-  background: linear-gradient(135deg, #fff, #f8fafc);
-}
-
-.timer-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 14px;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.timer-title {
-  font-size: 0.75rem;
-  font-weight: 800;
-  color: var(--accent);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.timer-presets { display: flex; gap: 6px; }
-.preset-btn {
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  color: var(--text-2);
-  padding: 4px 11px;
-  border-radius: 99px;
-  font-size: 0.73rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all .15s;
-}
-.preset-btn:hover, .preset-btn.active {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
-}
-
-.timer-select {
-  width: 100%;
-  background: var(--bg);
-  color: var(--text);
-  border: 1px solid var(--border);
-  padding: 10px 13px;
-  border-radius: var(--radius);
-  font-size: 0.88rem;
-  font-weight: 700;
-  margin-bottom: 14px;
-  outline: none;
-  transition: border-color .2s;
-}
-.timer-select:focus { border-color: var(--accent); }
-
-.timer-display {
-  font-family: var(--font-mono);
-  font-size: 3.2rem;
-  font-weight: 700;
-  text-align: center;
-  letter-spacing: 4px;
-  margin: 10px 0 16px;
-  color: var(--text);
-  transition: color .3s;
-}
-.timer-display.running {
-  color: var(--success);
-  animation: glow 2.5s ease infinite;
-}
-@keyframes glow { 0%,100%{opacity:1} 50%{opacity:.75} }
-
-.timer-controls {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-.timer-btn {
-  border: none;
-  padding: 10px 22px;
-  border-radius: 99px;
-  font-weight: 800;
-  font-size: 0.88rem;
-  cursor: pointer;
-  transition: opacity .15s, transform .1s;
-}
-.timer-btn:hover  { opacity: .85; transform: translateY(-1px); }
-.timer-btn:active { transform: scale(.95); }
-.timer-btn-primary   { background: var(--accent);  color: #fff; }
-.timer-btn-secondary { background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); }
-.timer-btn-success   { background: var(--success); color: #fff; }
-
-/* ================================================================
-   ANALYTICS / STATS
-   ================================================================ */
-.stats-grid {
-  display: grid;
-  grid-template-columns: 1.6fr 1fr;
-  gap: 14px;
-  margin-bottom: 16px;
-}
-
-.stat-header {
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-3);
-  margin-bottom: 14px;
-}
-.stat-val {
-  font-size: 2.2rem;
-  font-weight: 900;
-  color: var(--accent);
-  line-height: 1;
-  margin-bottom: 4px;
-}
-
-.graph-nav {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 14px;
-  gap: 8px;
-}
-
-/* Heatmap */
-.heatmap-card { grid-column: 1 / -1; overflow-x: auto; }
-.heatmap-container { display: flex; overflow-x: auto; padding: 6px 0 10px; }
-.heatmap-grid {
-  display: grid;
-  grid-template-rows: repeat(7, 13px);
-  grid-auto-flow: column;
-  grid-auto-columns: 13px;
-  gap: 3px;
-}
-.heatmap-tile {
-  width: 13px;
-  height: 13px;
-  border-radius: 3px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  cursor: default;
-  transition: transform .1s;
-}
-.heatmap-tile:hover { transform: scale(1.35); z-index: 10; position: relative; }
-.heatmap-tile.lvl-0 { background: var(--surface-2); }
-.heatmap-tile.lvl-1 { background: #0e4429; border-color: #0e4429; }
-.heatmap-tile.lvl-2 { background: #006d32; border-color: #006d32; }
-.heatmap-tile.lvl-3 { background: #26a641; border-color: #26a641; }
-.heatmap-tile.lvl-4 { background: #39d353; border-color: #39d353; }
-[data-theme="light"] .heatmap-tile.lvl-1 { background: #9be9a8; border-color: #9be9a8; }
-[data-theme="light"] .heatmap-tile.lvl-2 { background: #40c463; border-color: #40c463; }
-[data-theme="light"] .heatmap-tile.lvl-3 { background: #30a14e; border-color: #30a14e; }
-[data-theme="light"] .heatmap-tile.lvl-4 { background: #216e39; border-color: #216e39; }
-
-.heatmap-legend {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.7rem;
-  color: var(--text-3);
-  margin-top: 8px;
-  justify-content: flex-end;
-}
-.heatmap-legend .sq {
-  width: 10px; height: 10px;
-  border-radius: 2px;
-}
-.sq.l0 { background: var(--surface-2); border: 1px solid var(--border); }
-.sq.l1 { background: #0e4429; }
-.sq.l2 { background: #006d32; }
-.sq.l3 { background: #26a641; }
-.sq.l4 { background: #39d353; }
-[data-theme="light"] .sq.l1 { background: #9be9a8; }
-[data-theme="light"] .sq.l2 { background: #40c463; }
-[data-theme="light"] .sq.l3 { background: #30a14e; }
-[data-theme="light"] .sq.l4 { background: #216e39; }
-
-/* Month cards */
-.month-summary-card {
-  width: 100%;
-  text-align: left;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-  border-radius: var(--radius-lg);
-  padding: 16px;
-  cursor: pointer;
-  margin-bottom: 10px;
-  transition: border-color .2s, transform .15s, box-shadow .2s;
-}
-.month-summary-card:hover {
-  border-color: var(--accent);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
-}
-.month-summary-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.month-summary-name { font-weight: 800; font-size: 1rem; }
-.month-summary-sub  { font-size: 0.82rem; color: var(--text-2); margin-top: 2px; }
-.month-summary-score { font-weight: 800; color: var(--accent); font-size: 1rem; }
-
-/* ================================================================
-   MODALS
-   ================================================================ */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: var(--modal-overlay);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-  padding: 16px;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity .2s;
-}
-.modal-overlay.show {
-  display: flex;
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-}
-
-.modal-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
-  width: 100%;
-  max-width: 400px;
-  padding: 28px;
-  box-shadow: var(--shadow-lg);
-  position: relative;
-  z-index: 2001;
-  max-height: calc(100dvh - 40px);
-  overflow-y: auto;
-}
-
-.modal-title {
-  font-weight: 800;
-  font-size: 1.2rem;
-  margin-bottom: 6px;
-}
-.modal-sub {
-  font-size: 0.85rem;
-  color: var(--text-2);
-  margin-bottom: 20px;
-}
-
-.modal-form { display: flex; flex-direction: column; gap: 10px; }
-
-.modal-btns {
-  display: flex;
-  gap: 10px;
-  margin-top: 22px;
-}
-.m-btn {
-  flex: 1;
-  padding: 13px;
-  border-radius: var(--radius);
-  border: none;
-  cursor: pointer;
-  font-weight: 800;
-  font-size: 0.9rem;
-  transition: opacity .15s, transform .1s;
-}
-.m-btn:hover  { opacity: .88; transform: translateY(-1px); }
-.m-btn-cancel { background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); }
-.m-btn-save   { background: var(--accent); color: #fff; }
-.m-btn-danger { background: var(--danger); color: #fff; }
-
-/* Month detail modal */
-.month-detail-card {
-  max-width: 520px;
-}
-.month-detail-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 18px;
-}
-.month-detail-kicker {
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-3);
-  margin-bottom: 3px;
-}
-.month-close {
-  width: 36px;
-  height: 36px;
-  border-radius: 99px;
-  border: none;
-  background: var(--surface-2);
-  color: var(--text-2);
-  font-size: 1.1rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: background .15s, color .15s;
-}
-.month-close:hover { background: var(--danger-dim); color: var(--danger); }
-.month-detail-list {
-  display: grid;
-  gap: 10px;
-  max-height: min(60vh, 500px);
-  overflow-y: auto;
-  padding-right: 2px;
-}
-.month-activity-card {
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px;
-}
-
-.activity-reminder {
-    display: inline-block;
-    margin-left: 8px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #d97706;
-}
-.month-activity-name { font-weight: 800; font-size: 0.95rem; margin-bottom: 4px; word-break: break-word; }
-.month-activity-meta { font-size: 0.82rem; color: var(--text-2); }
-
-/* ================================================================
-   EXPORT / IMPORT MODAL
-   ================================================================ */
-.export-modal-card { max-width: 460px; }
-.export-modal-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-.section-kicker {
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-3);
-  margin-bottom: 10px;
-}
-.export-btn-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 18px;
-}
-.export-action-btn {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px;
-  cursor: pointer;
-  text-align: left;
-  color: var(--text);
-  transition: border-color .2s, transform .15s, box-shadow .2s;
-}
-.export-action-btn:hover {
-  border-color: var(--accent);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
-}
-.export-icon {
-  font-size: 1.3rem;
-  font-weight: 900;
-  color: var(--accent);
-  width: 30px;
-  text-align: center;
-  font-family: var(--font-mono);
-  flex-shrink: 0;
-}
-.export-btn-title { font-weight: 800; font-size: 0.85rem; margin-bottom: 2px; }
-.export-btn-sub   { font-size: 0.72rem; color: var(--text-2); }
-
-.divider-line {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 8px 0 16px;
-  color: var(--text-3);
-  font-size: 0.72rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-.divider-line::before, .divider-line::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-}
-
-.export-import-btn {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  width: 100%;
-  background: var(--accent-dim);
-  border: 1.5px dashed var(--accent);
-  border-radius: var(--radius);
-  padding: 15px;
-  cursor: pointer;
-  text-align: left;
-  color: var(--text);
-  transition: background .2s, transform .15s;
-}
-.export-import-btn:hover { background: rgba(99,102,241,.22); transform: translateY(-1px); }
-
-/* ================================================================
-   TOAST
-   ================================================================ */
-.export-toast {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%) translateY(90px);
-  background: var(--surface);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--success);
-  padding: 12px 22px;
-  border-radius: var(--radius);
-  font-weight: 800;
-  font-size: 0.88rem;
-  box-shadow: var(--shadow-lg);
-  z-index: 9999;
-  transition: transform .35s cubic-bezier(.34,1.56,.64,1), opacity .25s;
-  opacity: 0;
-  white-space: nowrap;
-  pointer-events: none;
-}
-.export-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-.export-toast.err  { border-left-color: var(--danger); }
-
-/* ================================================================
-   EMPTY STATE
-   ================================================================ */
-.empty-state {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--text-3);
-  grid-column: 1 / -1;
-}
-.empty-state .icon { font-size: 2.5rem; margin-bottom: 10px; }
-.empty-state p { font-size: 0.88rem; }
-
-/* ================================================================
-   FOOTER
-   ================================================================ */
-#footer {
-  text-align: center;
-  padding: 36px 20px;
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  margin-top: 50px;
-}
-.f-link {
-  display: inline-block;
-  color: var(--accent);
-  text-decoration: none;
-  font-weight: 700;
-  font-size: 0.85rem;
-  margin: 8px 12px;
-  transition: opacity .15s;
-}
-.f-link:hover { opacity: .7; }
-
-/* ================================================================
-   RESPONSIVE
-   ================================================================ */
-@media (max-width: 720px) {
-  .top-nav {
-    grid-template-columns: 1fr auto;
-    grid-template-rows: auto auto;
-    padding: 12px 16px;
-    gap: 8px;
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "track",
+    "alternateName": "track",
+    "url": "https://track.mohaktools.com/",
+    "description": "A productivity and daily activity tracking tool for tracking habits, goals, deep work sessions and consistency.",
+    "applicationCategory": "ProductivityApplication",
+    "operatingSystem": "Web",
+    "author": {
+      "@type": "Person",
+      "name": "Mohak Choubey"
+    },
+    "inLanguage": "en"
   }
-  .logo     { grid-column: 1; grid-row: 1; }
-  .time-box { grid-column: 2; grid-row: 1; text-align: right; }
-  #auth-ui  {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    border-top: 1px solid var(--border);
-    padding-top: 10px;
-    justify-content: center;
-  }
-  #user-info { max-width: 100%; width: 100%; justify-content: center; flex-wrap: wrap; }
+  </script>
 
-  .stats-grid { grid-template-columns: 1fr; }
-  .list-grid  { grid-template-columns: 1fr; }
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
 
-  .entry-grid   { grid-template-columns: 1fr; }
-  .entry-row-2  { grid-template-columns: 1fr 1fr; }
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
 
-  .toolbar { gap: 6px; }
-  .tabs { width: 100%; }
-  .tab  { flex: 1; text-align: center; }
-  .toolbar-actions { width: 100%; justify-content: flex-end; }
-}
+  <!-- Styles -->
+  <link rel="stylesheet" href="assets/index.css">
 
-@media (max-width: 480px) {
-  .container { padding: 14px 14px 36px; }
-  .card, .entry-card { padding: 16px; }
-  .timer-display { font-size: 2.5rem; }
-  .export-btn-grid { grid-template-columns: 1fr; }
-  .modal-card { padding: 22px; }
-  .entry-row-2 { grid-template-columns: 1fr; }
-  .timer-controls { flex-direction: column; gap: 8px; }
-  .timer-btn { width: 100%; }
-  .modal-btns { flex-direction: column; }
-  #liveTime { font-size: 0.85rem; }
-}
-.date-selector {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
+  <!-- App -->
+  <script src="assets/index.js" defer></script>
 
-.date-nav-btn {
-    background: var(--card-bg, rgba(255, 255, 255, 0.05));
-    color: var(--text, #fff);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    padding: 6px 12px;
-    font-size: 0.9rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.2s ease, transform 0.1s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+<body>
+<!-- ============================================================
+     NAVIGATION
+     ============================================================ -->
+<nav class="top-nav" role="navigation" aria-label="Main navigation">
+  <div class="logo">
+    Track
+    <span>by Mohaktools</span>
+  </div>
 
-.date-nav-btn:hover {
-    background: var(--accent, #3b82f6);
-    color: #ffffff;
-}
+  <div id="auth-ui">
+    <button type="button" id="login-btn" onclick="handleLogin()">Sign in with Google</button>
+    <div id="user-info" aria-live="polite">
+      <img id="user-pic" src="" alt="Profile picture">
+      <span id="user-name"></span>
+      <button type="button" id="logout-btn" onclick="handleLogout()">Sign Out</button>
+    </div>
+  </div>
 
-.date-nav-btn:active {
-    transform: scale(0.95);
-}
+  <div class="time-box" aria-live="polite">
+    <div id="liveTime">--:--:-- --</div>
+    <div id="liveDate">LOADING...</div>
+  </div>
+</nav>
 
-/* Touch target minimum for mobile */
-@media (pointer: coarse) {
-  .act-btn, .cat-chip, .chip, .tab, .timer-btn, .btn-add, .m-btn {
-    min-height: 40px;
-  }
-}
-/* ---------- Date Input & Navigation — Design System v3 ---------- */
 
-.date-selector {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
+<!-- ============================================================
+     MAIN CONTENT
+     ============================================================ -->
+<main class="container">
 
-/* Native Date Input styling with Token integration */
-input[type="date"],
-#calInput {
-    appearance: none;
-    -webkit-appearance: none;
-    background-color: var(--surface);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 8px 12px;
-    font-family: var(--font);
-    font-size: 0.875rem;
-    outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
+  <!-- Toolbar: Tabs + Actions -->
+  <div class="toolbar">
+    <div class="tabs" role="tablist">
+      <button class="tab active" id="tab-track" role="tab" aria-selected="true"  onclick="switchView('track')">Tracking</button>
+      <button class="tab"        id="tab-stats" role="tab" aria-selected="false" onclick="switchView('stats')">Analytics</button>
+    </div>
+    <div class="toolbar-actions">
+      <button class="icon-btn" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle theme">🌓</button>
+      <button class="icon-btn" onclick="openExportModal()" title="Export / Import">⬆ Export</button>
+    </div>
+  </div>
 
-/* Force native browser controls (mm/dd/yyyy text) to respect current mode */
-[data-theme="dark"] input[type="date"],
-[data-theme="dark"] #calInput {
-    color-scheme: dark;
-}
 
-[data-theme="light"] input[type="date"],
-[data-theme="light"] #calInput {
-    color-scheme: light;
-}
+  <!-- ══════════════════════════════════════
+       TRACKING VIEW
+       ══════════════════════════════════════ -->
+  <div id="trackView" role="tabpanel">
 
-input[type="date"]:focus,
-#calInput:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-dim);
-}
+    <!-- Focus Timer -->
+    <div class="timer-card">
+      <div class="timer-header">
+        <span class="timer-title">⏱ Deep Work Timer</span>
+        <div class="timer-presets">
+          <button class="preset-btn active" onclick="setTimerPreset(25, this)">25m</button>
+          <button class="preset-btn"        onclick="setTimerPreset(50, this)">50m</button>
+          <button class="preset-btn"        onclick="setTimerPreset(0,  this)">Stopwatch</button>
+        </div>
+      </div>
 
-/* Native Calendar Icon — uses your token's --cal-invert filter */
-input[type="date"]::-webkit-calendar-picker-indicator {
-    cursor: pointer;
-    filter: var(--cal-invert);
-    opacity: 0.7;
-    transition: opacity 0.2s ease;
-}
+      <select id="timerTaskSelect" class="timer-select" aria-label="Select activity to focus on">
+        <option value="">— Select activity to focus on —</option>
+      </select>
 
-input[type="date"]::-webkit-calendar-picker-indicator:hover {
-    opacity: 1;
-}
+      <div id="timerDisplay" class="timer-display" aria-live="off">25:00</div>
 
-/* Navigation Arrow Buttons matching surface-2 & border tokens */
-.date-nav-btn {
-    background-color: var(--surface);
-    color: var(--text-2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 8px 12px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+      <div class="timer-controls">
+        <button id="timerToggleBtn" class="timer-btn timer-btn-primary" onclick="toggleTimer()">Start Focus</button>
+        <button class="timer-btn timer-btn-secondary" onclick="resetTimer()">Reset</button>
+        <button class="timer-btn timer-btn-success"   onclick="openSessionModalFromTimer()">Log Session</button>
+      </div>
+    </div>
 
-.date-nav-btn:hover {
-    background-color: var(--surface-2);
-    color: var(--text);
-    border-color: var(--border-2);
-}
+    <!-- Quick Add Chips -->
+    <div class="section-label">Quick Add <em>Scroll for more →</em></div>
+    <div class="chips-row" id="chips" role="list">
+      <div class="chip" role="listitem" onclick="quickAdd('Math Practice 📚')">Math Practice 📚</div>
+      <div class="chip" role="listitem" onclick="quickAdd('Current Affairs 📰')">Current Affairs 📰</div>
+      <div class="chip" role="listitem" onclick="quickAdd('Swimming 🏊')">Swimming 🏊</div>
+      <div class="chip" role="listitem" onclick="quickAdd('Gym Workout 🏋️')">Gym Workout 🏋️</div>
+      <div class="chip" role="listitem" onclick="quickAdd('Cycling 🚴')">Cycling 🚴</div>
+      <div class="chip" role="listitem" onclick="quickAdd('Running 🏃')">Running 🏃</div>
+      <div class="chip" role="listitem" onclick="quickAdd('Reading 📖')">Reading 📖</div>
+      <div class="chip" role="listitem" onclick="quickAdd('Meditation 🧘')">Meditation 🧘</div>
+      <div class="chip" role="listitem" onclick="quickAdd('Coding 💻')">Coding 💻</div>
+      <div class="chip" role="listitem" onclick="quickAdd('Journaling ✍️')">Journaling ✍️</div>
+      <div class="chip" role="listitem" onclick="quickAdd('Language Study 🗣️')">Language Study 🗣️</div>
+    </div>
 
-.date-nav-btn:active {
-    transform: scale(0.95);
-}
-/* Light mode */
-#taskList .item.done {
-    background: rgba(100, 116, 139, 0.10);
-    border-color: rgba(100, 116, 139, 0.25);
-    border-left: 4px solid #64748b;
-    opacity: 0.85;
-    transition: background 0.25s ease,
-                border-color 0.25s ease,
-                opacity 0.25s ease;
-}
+    <!-- Add Activity Form -->
+    <div class="entry-card">
+      <div class="section-label" style="margin-bottom:14px;">Add New Activity</div>
+      <div class="entry-grid">
+        <div class="input-wrapper">
+          <input type="text" id="tName" placeholder="Activity name…" autocomplete="off"
+                 onkeydown="if(event.key==='Enter')addTask()">
+          <span class="clear-btn" onclick="document.getElementById('tName').value=''" aria-label="Clear">×</span>
+        </div>
+        <div class="date-selector">
+    <button type="button" class="date-nav-btn" onclick="shiftDate(-1)" title="Previous Day">
+        &#10094;
+    </button>
+    
+    <input type="date" id="calInput" onchange="syncDateInputs(this)">
+    
+    <button type="button" class="date-nav-btn" onclick="shiftDate(1)" title="Next Day">
+        &#10095;
+    </button>
+</div>
 
-/* Dark mode */
-[data-theme="dark"] #taskList .item.done {
-    background: rgba(148, 163, 184, 0.12);
-    border-color: rgba(148, 163, 184, 0.22);
-    border-left: 4px solid #94a3b8;
-    opacity: 0.9;
-}
+        <div class="input-wrapper">
+          <input type="number" id="tTarget" placeholder="Target days" min="1" max="365"
+                 onkeydown="if(event.key==='Enter')addTask()">
+          <span class="clear-btn" onclick="document.getElementById('tTarget').value=''" aria-label="Clear">×</span>
+        </div>
+      </div>
+      <div class="entry-row-2">
+        <select id="tCategory" class="cat-select" aria-label="Category">
+          <option value="General">🏷️ General</option>
+          <option value="Work">💼 Work</option>
+          <option value="Learning">📚 Learning</option>
+          <option value="Health">🏋️ Health</option>
+          <option value="Personal">🏠 Personal</option>
+        </select>
+        <button class="btn-add" onclick="addTask()">+ Add Activity</button>
+      </div>
+    </div>
 
-.task-view-switch {
-    display: flex;
-    gap: 5px;
-    padding: 5px;
-    margin-bottom: 16px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-}
+    <!-- Date + Category Filter -->
+    <div class="date-bar">
+      <input type="date" id="calInputBar" aria-label="Select date" onchange="syncDateInputs(this)">
+      <div class="cat-filter-bar" id="catFilterBar" role="group" aria-label="Filter by category">
+        <button class="cat-chip active" onclick="setCategoryFilter('All')">All</button>
+        <button class="cat-chip" onclick="setCategoryFilter('General')">🏷️ General</button>
+        <button class="cat-chip" onclick="setCategoryFilter('Work')">💼 Work</button>
+        <button class="cat-chip" onclick="setCategoryFilter('Learning')">📚 Learning</button>
+        <button class="cat-chip" onclick="setCategoryFilter('Health')">🏋️ Health</button>
+        <button class="cat-chip" onclick="setCategoryFilter('Personal')">🏠 Personal</button>
+      </div>
+    </div>
 
-.task-view-switch button {
-    flex: 1;
-    padding: 11px;
-    border: none;
-    border-radius: 9px;
-    background: transparent;
-    color: var(--text-dim);
-    font-weight: 800;
-    cursor: pointer;
-    transition: 0.2s ease;
-}
+    <!-- Task List -->
+    <div class="list-grid" id="taskList" role="list" aria-live="polite"></div>
 
-.task-view-switch button.active {
-    background: var(--card);
-    color: var(--accent);
-    box-shadow: 0 2px 7px rgba(0,0,0,0.08);
-}
+  </div><!-- /trackView -->
 
-/* ---------- Loader retry ---------- */
-.boot-retry {
-  margin-top: 6px; padding: 10px 22px; border-radius: 999px; border: 1px solid var(--border-2);
-  background: var(--accent); color: #fff; font: inherit; font-weight: 700; cursor: pointer;
-}
 
-/* ---------- Track assistant ---------- */
-.chat-fab {
-  position: fixed; right: 18px; bottom: 18px; z-index: 1500; border: none;
-  background: var(--accent); color: #fff; font: inherit; font-weight: 700; font-size: .9rem;
-  padding: 12px 18px; border-radius: 999px; box-shadow: var(--shadow-lg); cursor: pointer;
-}
-.chat-fab:hover { filter: brightness(1.08); }
-.chat-panel {
-  position: fixed; right: 18px; bottom: 80px; z-index: 1500;
-  width: min(380px, calc(100vw - 36px)); height: min(520px, calc(100vh - 120px));
-  display: flex; flex-direction: column; background: var(--surface);
-  border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); overflow: hidden;
-}
-.chat-panel[hidden] { display: none; }
-.chat-head {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 16px; border-bottom: 1px solid var(--border); font-weight: 800;
-}
-.chat-log { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
-.chat-msg {
-  max-width: 88%; padding: 9px 12px; border-radius: var(--radius); font-size: .9rem; line-height: 1.45;
-  white-space: pre-wrap; word-wrap: break-word;
-}
-.chat-user { align-self: flex-end; background: var(--accent); color: #fff; }
-.chat-bot { align-self: flex-start; background: var(--surface-2); color: var(--text); }
-.chat-proposal { align-self: flex-start; background: var(--surface-2); border: 1px dashed var(--border-2); color: var(--text); }
-.chat-actions { display: flex; gap: 8px; margin-top: 10px; }
-.chat-actions button { flex: 1; }
-.chat-status { margin-top: 8px; font-size: .8rem; color: var(--text-2); }
-.chat-note { font-size: .72rem; color: var(--text-3); padding: 0 14px 8px; }
-.chat-form { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--border); }
-.chat-form input {
-  flex: 1; min-width: 0; padding: 10px 12px; border-radius: var(--radius-sm);
-  border: 1px solid var(--border-2); background: var(--bg); color: var(--text); font: inherit;
-}
-.chat-form button {
-  padding: 10px 14px; border-radius: var(--radius-sm); border: none; background: var(--accent);
-  color: #fff; font: inherit; font-weight: 700; cursor: pointer;
-}
-@media (max-width: 640px) {
-  .chat-fab { right: 12px; bottom: 12px; }
-  .chat-panel { right: 10px; bottom: 70px; }
-}
+  <!-- ══════════════════════════════════════
+       ANALYTICS VIEW
+       ══════════════════════════════════════ -->
+  <div id="statsView" style="display:none;" role="tabpanel">
 
-/* ---------- Legal ---------- */
-.legal-body { max-height: 60vh; overflow-y: auto; font-size: .88rem; line-height: 1.6; color: var(--text-2); }
-.legal-body h3 { color: var(--text); font-size: 1rem; margin: 14px 0 6px; }
-.legal-body p { margin-bottom: 8px; }
+    <!-- Heatmap -->
+    <div class="card heatmap-card">
+      <div class="stat-header">Annual Consistency — Past 365 Days</div>
+      <div id="heatmapContainer" class="heatmap-container"></div>
+      <div class="heatmap-legend" aria-label="Heatmap legend">
+        <span>Less</span>
+        <span class="sq l0"></span>
+        <span class="sq l1"></span>
+        <span class="sq l2"></span>
+        <span class="sq l3"></span>
+        <span class="sq l4"></span>
+        <span>More</span>
+      </div>
+    </div>
+
+    <!-- Charts Grid -->
+    <div class="stats-grid">
+      <!-- 7-day trend -->
+      <div class="card">
+        <div class="stat-header">7-Day Activity Trend <span id="rangeLabel" style="color:var(--accent);font-weight:700;"></span></div>
+        <div style="height:220px; position:relative;"><canvas id="lineChart"></canvas></div>
+        <div class="graph-nav">
+          <button class="cat-chip" onclick="changeGraphRange(-1)">← Earlier</button>
+          <button class="cat-chip" onclick="changeGraphRange(1)">Later →</button>
+        </div>
+      </div>
+
+      <!-- Deep Work Time -->
+      <div class="card" style="display:flex;flex-direction:column;justify-content:center;">
+        <div class="stat-header">Total Deep Work</div>
+        <div class="stat-val" id="totalFocusHours">0.0 hrs</div>
+        <div style="font-size:0.78rem;color:var(--text-2);margin-top:4px;">Logged this month</div>
+      </div>
+
+      <!-- Today's completion pie -->
+      <div class="card">
+        <div class="stat-header">Today's Completion</div>
+        <div style="height:220px; position:relative;"><canvas id="pieChart"></canvas></div>
+      </div>
+
+      <!-- Placeholder hidden time chart slot -->
+      <div class="card" style="display:none; grid-column:1/-1;">
+        <div class="stat-header">Time Distribution by Activity (Hours)</div>
+        <canvas id="timeChart" style="max-height:220px;"></canvas>
+      </div>
+    </div>
+
+    <!-- Monthly summary list -->
+    <div id="monthList"></div>
+
+  </div><!-- /statsView -->
+
+</main>
+
+
+<!-- ============================================================
+     MODALS
+     ============================================================ -->
+
+<!-- Edit Activity -->
+<div id="editModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+  <div class="modal-card">
+    <p class="modal-title" id="editModalTitle">Edit Activity</p>
+    <p class="modal-sub">Update the name, goal, and category.</p>
+    <div class="modal-form">
+      <div class="input-wrapper">
+        <input type="text" id="editName" placeholder="Activity name…">
+        <span class="clear-btn" onclick="document.getElementById('editName').value=''">×</span>
+      </div>
+      <div class="input-wrapper">
+        <input type="number" id="editTarget" placeholder="Target days" min="1" max="365">
+        <span class="clear-btn" onclick="document.getElementById('editTarget').value=''">×</span>
+      </div>
+      <select id="editCategory" class="cat-select">
+        <option value="General">🏷️ General</option>
+        <option value="Work">💼 Work</option>
+        <option value="Learning">📚 Learning</option>
+        <option value="Health">🏋️ Health</option>
+        <option value="Personal">🏠 Personal</option>
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="m-btn m-btn-cancel" onclick="closeModals()">Cancel</button>
+      <button class="m-btn m-btn-save" id="saveEditBtn">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirm -->
+<div id="deleteModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+  <div class="modal-card">
+    <p class="modal-title" id="deleteModalTitle" style="color:var(--danger);">Delete Activity?</p>
+    <p class="modal-sub">This permanently removes the activity and all logged history. This cannot be undone.</p>
+    <div class="modal-btns">
+      <button class="m-btn m-btn-cancel" onclick="closeModals()">Cancel</button>
+      <button class="m-btn m-btn-danger" id="confirmDelBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Log Deep Work Session -->
+<div id="sessionModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="sessionModalTitle">
+  <div class="modal-card">
+    <p class="modal-title" id="sessionModalTitle">📝 Log Deep Work Session</p>
+    <p class="modal-sub">Record time spent and your output notes.</p>
+    <input type="hidden" id="sessionTaskId">
+    <div class="modal-form">
+      <label style="font-size:0.8rem;font-weight:700;color:var(--text-2);">Duration (minutes)</label>
+      <input type="number" id="sessionDuration" placeholder="e.g. 45" min="1">
+      <label style="font-size:0.8rem;font-weight:700;color:var(--text-2);">Reflection / Notes</label>
+      <textarea id="sessionNotes" placeholder="What did you accomplish? e.g. Completed Chapter 3, fixed login bug…" rows="3"></textarea>
+    </div>
+    <div class="modal-btns">
+      <button class="m-btn m-btn-cancel" onclick="closeModals()">Cancel</button>
+      <button class="m-btn m-btn-save" onclick="saveSessionModal()">Save Log</button>
+    </div>
+  </div>
+</div>
+
+<!-- Month Detail -->
+<div id="monthDetailModal" class="modal-overlay" role="dialog" aria-modal="true"
+     aria-labelledby="monthModalTitle" onclick="closeMonthModal(event)">
+  <div class="modal-card month-detail-card" onclick="event.stopPropagation()">
+    <div class="month-detail-head">
+      <div>
+        <div class="month-detail-kicker">Month breakdown</div>
+        <h2 id="monthModalTitle" style="font-size:1.2rem;">Month</h2>
+      </div>
+      <button class="month-close" onclick="hideMonthModal()" aria-label="Close">×</button>
+    </div>
+    <div id="monthModalContent" class="month-detail-list"></div>
+  </div>
+</div>
+
+<!-- Export / Import -->
+<div id="exportImportModal" class="modal-overlay" role="dialog" aria-modal="true"
+     aria-labelledby="exportModalTitle" onclick="if(event.target===this)closeExportModal()">
+  <div class="modal-card export-modal-card">
+    <div class="export-modal-head">
+      <div>
+        <div class="month-detail-kicker">Data Management</div>
+        <h2 id="exportModalTitle" style="font-size:1.2rem;">Export / Import</h2>
+      </div>
+      <button class="month-close" onclick="closeExportModal()" aria-label="Close">×</button>
+    </div>
+
+    <div class="section-kicker">Export your data</div>
+    <div class="export-btn-grid">
+      <button type="button" class="export-action-btn" onclick="exportJSON()">
+        <span class="export-icon">{ }</span>
+        <div>
+          <div class="export-btn-title">JSON Backup</div>
+          <div class="export-btn-sub">Full backup · restore anytime</div>
+        </div>
+      </button>
+      <button type="button" class="export-action-btn" onclick="exportPDF()">
+        <span class="export-icon" style="color:var(--danger);">⬇</span>
+        <div>
+          <div class="export-btn-title">PDF Report</div>
+          <div class="export-btn-sub">Printable summary</div>
+        </div>
+      </button>
+      <button type="button" class="export-action-btn" onclick="exportTXT()">
+        <span class="export-icon" style="color:var(--success);">T</span>
+        <div>
+          <div class="export-btn-title">Text File</div>
+          <div class="export-btn-sub">Plain text log</div>
+        </div>
+      </button>
+      <button type="button" class="export-action-btn" onclick="exportCSV()">
+        <span class="export-icon" style="color:var(--warn);">⊞</span>
+        <div>
+          <div class="export-btn-title">CSV Spreadsheet</div>
+          <div class="export-btn-sub">Open in Excel / Sheets</div>
+        </div>
+      </button>
+    </div>
+
+    <div class="divider-line"><span>Import</span></div>
+
+    <div class="section-kicker">Restore from file</div>
+    <button type="button" class="export-import-btn" onclick="importJSON()">
+      <span style="font-size:1.5rem;">📂</span>
+      <div>
+        <div class="export-btn-title">Import JSON Backup</div>
+        <div class="export-btn-sub">Merges tasks &amp; logs — existing data is never deleted</div>
+      </div>
+    </button>
+
+    <div class="divider-line"><span>Danger zone</span></div>
+    <button type="button" class="export-import-btn" style="border-color:var(--danger);" onclick="openDeleteAllModal()">
+      <span style="font-size:1.5rem;">🗑️</span>
+      <div>
+        <div class="export-btn-title" style="color:var(--danger);">Delete all data</div>
+        <div class="export-btn-sub">Removes everything from this device and from your cloud account</div>
+      </div>
+    </button>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer id="footer">
+  <p style="font-size:0.82rem;color:var(--text-3);font-weight:600;">track · Built with ♥ by Mohak Choubey</p>
+  <div style="margin-top:12px;">
+    <a href="https://mohakchoubey.github.io/" target="_blank" rel="noopener" class="f-link">Other Projects</a>
+    <a href="#" onclick="openLegal(); return false;" class="f-link">Privacy &amp; Terms</a>
+  </div>
+</footer>
+
+
+
+<!-- ============================================================
+     TRACK ASSISTANT
+     ============================================================ -->
+<button type="button" id="chatFab" class="chat-fab" onclick="toggleChat()" aria-controls="chatPanel" aria-expanded="false">💬 Ask Track</button>
+<section id="chatPanel" class="chat-panel" role="dialog" aria-label="Track assistant" hidden>
+  <div class="chat-head">
+    <span>Track assistant</span>
+    <button type="button" class="month-close" onclick="toggleChat()" aria-label="Close assistant">×</button>
+  </div>
+  <div id="chatLog" class="chat-log" aria-live="polite"></div>
+  <p class="chat-note">Activity names and today's status are sent to the AI to answer you. Nothing changes until you confirm.</p>
+  <form id="chatForm" class="chat-form" onsubmit="sendChat(event)">
+    <input id="chatInput" type="text" placeholder="e.g. Add gym for today under Health" autocomplete="off" maxlength="500">
+    <button type="submit">Send</button>
+  </form>
+</section>
+
+<!-- Delete all data -->
+<div id="deleteAllModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="deleteAllTitle">
+  <div class="modal-card">
+    <p class="modal-title" id="deleteAllTitle" style="color:var(--danger);">Delete all data?</p>
+    <p class="modal-sub">This permanently deletes every activity, log and note on this device and, if you're signed in, in your cloud account. It cannot be undone. Export a backup first if you want to keep it.</p>
+    <div class="modal-form">
+      <label style="font-size:0.8rem;font-weight:700;color:var(--text-2);">Type DELETE to confirm</label>
+      <input type="text" id="deleteAllInput" placeholder="DELETE" autocomplete="off">
+    </div>
+    <div class="modal-btns">
+      <button class="m-btn m-btn-cancel" onclick="closeModals()">Cancel</button>
+      <button class="m-btn m-btn-danger" onclick="confirmDeleteAll()">Delete everything</button>
+    </div>
+  </div>
+</div>
+
+<!-- Privacy & Terms (draft: review before publishing) -->
+<div id="legalModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="legalTitle" onclick="if(event.target===this)closeModals()">
+  <div class="modal-card export-modal-card">
+    <div class="export-modal-head">
+      <div>
+        <div class="month-detail-kicker">Legal</div>
+        <h2 id="legalTitle" style="font-size:1.2rem;">Privacy Policy &amp; Terms</h2>
+      </div>
+      <button class="month-close" onclick="closeModals()" aria-label="Close">×</button>
+    </div>
+    <div class="legal-body">
+      <h3>Privacy Policy</h3>
+      <p><strong>Last updated:</strong> November 2026.</p>
+      <p><strong>What we store.</strong> Track stores the activities you create, their categories and targets, daily done or not-done status, deep-work minutes and notes, and your theme choice.</p>
+      <p><strong>Where it is stored.</strong> If you are not signed in, your data stays only in this browser and does not leave your device. If you sign in with Google, your data is stored only in the cloud (Google Firebase Firestore), linked to your Google account. Your data is never kept in both places.</p>
+      <p><strong>AI assistant.</strong> When you use the assistant, your message, plus the names, categories and today's status of your activities, is sent through a relay we run (Cloudflare Workers) to Groq, which generates the reply. The chat is kept only in the open tab and is cleared when you reload. Nothing in your data changes unless you confirm it.</p>
+      <p><strong>Sharing.</strong> We do not sell your data or use it for advertising. Service providers: Google (sign-in and storage), Groq (AI replies), Cloudflare (assistant relay).</p>
+      <p><strong>Deleting your data.</strong> Use Export, then Danger zone, then Delete all data. For signed-in users this removes your cloud data and the device copy. Deleting your Google account is separate and is managed by Google.</p>
+      <p><strong>Your choices.</strong> You can export your data at any time.</p>
+      <p><strong>Contact.</strong> Questions: github.com/mohakdev1220.</p>
+
+      <h3>Terms of Use</h3>
+      <p>Track is provided free of charge, as is, without warranties. Keep your own backups (use Export). You are responsible for the activities you record and for what you send to the assistant. Do not use Track to store anything unlawful or to attack other users or services. The assistant can make mistakes, so check important information yourself. We may update these terms; the date above shows the latest version.</p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
