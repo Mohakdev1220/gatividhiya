@@ -1,7 +1,7 @@
 "use strict";
 
 /* ===============================
-   Gatividhi Tracker — PRO BUILD (CLEAN & INTEGRATED)
+   Track — daily activity tracker
    =============================== */
 
 if (window.__gatividhiTrackerLoaded) {
@@ -66,10 +66,40 @@ function loadLocal() {
     }
 }
 
-let state = loadLocal();
+let state = getDefaultState();   // filled in once we know whether the user is signed in
+let cloudReady = false;          // true only after a signed-in user's cloud data has loaded
+const BOOT_MIN_MS = 2500;        // the loader stays up at least this long
+const bootStartedAt = Date.now();
+let bootFinished = false;
+showAuthLoading("Loading your Track...");
 
+// Storage rule: signed-in users are saved ONLY to the cloud; signed-out users ONLY to this device.
 function saveLocal() {
+    if (auth.currentUser) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function hasLocalData() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return false;
+        const s = normalizeState(JSON.parse(raw));
+        return s.tasks.length > 0 || Object.keys(s.logs).length > 0;
+    } catch {
+        return false;
+    }
+}
+
+// Adds device-only activities into the account copy. Cloud wins when both have the same day/task.
+function mergeStates(cloudState, localState) {
+    const out = normalizeState(cloudState);
+    const known = new Set(out.tasks.map((t) => t.id));
+    localState.tasks.forEach((t) => { if (!known.has(t.id)) out.tasks.push(t); });
+    Object.entries(localState.logs).forEach(([dateKey, entries]) => {
+        out.logs[dateKey] = { ...entries, ...(out.logs[dateKey] || {}) };
+    });
+    out.meta.updatedAt = now();
+    return out;
 }
 
 /* ---------- Global Helpers ---------- */
@@ -167,25 +197,43 @@ async function syncToCloud(reason = "update") {
 
 function scheduleSync(reason = "update") {
     saveLocal();
+    if (!auth.currentUser) return;   // signed-out: device only
+    if (!cloudReady) return;         // never overwrite the cloud before its data has loaded
     if (saveTimer) clearTimeout(saveTimer);
     saveTimer = setTimeout(() => syncToCloud(reason), 250);
 }
 
 async function loadFromCloud(user) {
-    try {
-        const doc = await db.collection("users").doc(user.uid).get();
-        if (doc.exists && doc.data()?.data) {
-            state = normalizeState(doc.data().data);
-            saveLocal();
-            setThemeOnDocument();
-            renderTasks();
-            if (isStatsVisible()) renderStats();
-        } else {
-            await syncToCloud("first-save");
+    const ref = db.collection("users").doc(user.uid);
+    const snap = await ref.get();
+    const cloud = snap.exists ? snap.data()?.data : null;
+
+    if (cloud) {
+        state = normalizeState(cloud);
+        if (hasLocalData()) {
+            const local = normalizeState(JSON.parse(localStorage.getItem(STORAGE_KEY)));
+            const merge = confirm(
+                "This device has activities that are not in your account yet.\n\n" +
+                "OK = add them to your account.\n" +
+                "Cancel = discard them and keep only your account data."
+            );
+            if (merge) state = mergeStates(state, local);
+            await ref.set({ data: state, updatedAt: firebase.firestore.FieldValue.serverTimestamp(), reason: "merge-local" }, { merge: true });
         }
-    } catch (e) {
-        console.error("Load error:", e);
+    } else if (hasLocalData()) {
+        state = normalizeState(JSON.parse(localStorage.getItem(STORAGE_KEY)));
+        await ref.set({ data: state, updatedAt: firebase.firestore.FieldValue.serverTimestamp(), reason: "migrate-local" }, { merge: true });
+    } else {
+        state = getDefaultState();
+        await ref.set({ data: state, updatedAt: firebase.firestore.FieldValue.serverTimestamp(), reason: "first-save" }, { merge: true });
     }
+
+    // Signed-in data lives only in the cloud, so the device copy is removed.
+    localStorage.removeItem(STORAGE_KEY);
+    cloudReady = true;
+    setThemeOnDocument();
+    renderTasks();
+    if (isStatsVisible()) renderStats();
 }
 
 function listenToCloud(user) {
@@ -198,7 +246,6 @@ function listenToCloud(user) {
         if (JSON.stringify(normalized) === JSON.stringify(state)) return;
         
         state = normalized;
-        saveLocal();
         setThemeOnDocument();
         renderTasks();
         if (isStatsVisible()) renderStats();
@@ -325,37 +372,29 @@ function setAuthUI(user) {
 }
 
 auth.onAuthStateChanged(async (user) => {
+    setAuthUI(user);
+
     if (user) {
-        showAuthLoading("Loading your Google account...");
-
+        showAuthLoading("Checking your Google account...");
         try {
-            try {
-                await user.reload();
-            } catch (error) {
-                console.warn("Could not refresh user profile:", error);
-            }
-
+            try { await user.reload(); } catch (error) { console.warn("Could not refresh user profile:", error); }
             setAuthUI(auth.currentUser || user);
-
             showAuthLoading("Loading your activities...");
-            await loadFromCloud(auth.currentUser || user);
-
+            await withTimeout(loadFromCloud(auth.currentUser || user), 15000);
             listenToCloud(auth.currentUser || user);
+            finishBoot();
         } catch (error) {
-            console.error("Authentication initialization error:", error);
-        } finally {
-            hideAuthLoading();
+            console.error("Cloud load failed:", error);
+            showBootError("Could not load your activities. Check your internet connection.");
         }
     } else {
-        setAuthUI(null);
-
-        if (unsubscribeCloud) {
-            unsubscribeCloud();
-            unsubscribeCloud = null;
-        }
-
-        // Local mode remains available without Google authentication.
-        hideAuthLoading();
+        if (unsubscribeCloud) { unsubscribeCloud(); unsubscribeCloud = null; }
+        cloudReady = false;
+        state = loadLocal();
+        setThemeOnDocument();
+        renderTasks();
+        if (isStatsVisible()) renderStats();
+        finishBoot();
     }
 });
 
@@ -1101,12 +1140,12 @@ window.closeExportModal = () => document.getElementById("exportImportModal")?.cl
 
 window.exportJSON = function () {
     const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), version: 2, data: state }, null, 2)], { type: "application/json" });
-    triggerDownload(blob, `gatividhi-backup-${todayKey()}.json`);
+    triggerDownload(blob, `track-backup-${todayKey()}.json`);
     showExportToast("JSON exported ✓");
 };
 
 window.exportTXT = function () {
-    const lines = ["╔══════════════════════════════════════╗", "║     GATIVIDHI TRACKER — EXPORT       ║", "╚══════════════════════════════════════╝", `Exported on : ${new Date().toLocaleString("en-IN")}`, `Total tasks : ${state.tasks.length}\n`];
+    const lines = ["╔══════════════════════════════════════╗", "║     TRACK — EXPORT                  ║", "╚══════════════════════════════════════╝", `Exported on : ${new Date().toLocaleString("en-IN")}`, `Total tasks : ${state.tasks.length}\n`];
     const months = [...new Set(state.tasks.map(t => t.month))].sort().reverse();
     months.forEach(month => {
         lines.push(`━━━━  ${month}  ━━━━`);
@@ -1119,7 +1158,7 @@ window.exportTXT = function () {
         lines.push("");
     });
     const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
-    triggerDownload(blob, `gatividhi-export-${todayKey()}.txt`);
+    triggerDownload(blob, `track-export-${todayKey()}.txt`);
     showExportToast("TXT exported ✓");
 };
 
@@ -1131,7 +1170,7 @@ window.exportCSV = function () {
         rows.push([task.month, task.category || "General", `"${task.name.replace(/"/g, '""')}"`, task.target, done, pct, new Date(task.createdAt).toLocaleDateString("en-IN")]);
     });
     const blob = new Blob([rows.map(r => r.join(",")).join("\n")], { type: "text/csv;charset=utf-8" });
-    triggerDownload(blob, `gatividhi-tasks-${todayKey()}.csv`);
+    triggerDownload(blob, `track-tasks-${todayKey()}.csv`);
     showExportToast("CSV exported ✓");
 };
 
@@ -1162,6 +1201,8 @@ window.shiftDate = function (days) {
 
     // Update calendar input value
     calEl.value = todayKey(date);
+    const bar = document.getElementById("calInputBar");
+    if (bar) bar.value = calEl.value;
 
     // Refresh UI with the updated date
     renderTasks();
@@ -1178,7 +1219,7 @@ function buildAndDownloadPDF() {
     let y = 20;
 
     doc.setFillColor(...accent); doc.rect(0, 0, W, 28, "F");
-    doc.setFont("helvetica", "bold"); doc.setFontSize(16); doc.setTextColor(255, 255, 255); doc.text("Gatividhi Tracker", MARGIN, 13);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(16); doc.setTextColor(255, 255, 255); doc.text("Track", MARGIN, 13);
     doc.setFontSize(8); doc.setFont("helvetica", "normal"); doc.text("Exported: " + new Date().toLocaleString("en-IN"), W - MARGIN, 22, { align: "right" });
     
     y = 36;
@@ -1202,7 +1243,7 @@ function buildAndDownloadPDF() {
         y += 4;
     });
 
-    doc.save(`gatividhi-report-${todayKey()}.pdf`);
+    doc.save(`track-report-${todayKey()}.pdf`);
     showExportToast("PDF exported ✓");
 }
 
@@ -1236,6 +1277,370 @@ window.importJSON = function () {
     setTimeout(() => fileInput.remove(), 5000);
 };
 
+
+/* ---------- Boot loader (interface stays hidden until data is ready) ---------- */
+function withTimeout(promise, ms) {
+    return Promise.race([
+        promise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Timed out")), ms))
+    ]);
+}
+
+function finishBoot() {
+    // First load waits for the minimum time; later sign-ins hide the loader straight away.
+    const wait = bootFinished ? 0 : Math.max(0, BOOT_MIN_MS - (Date.now() - bootStartedAt));
+    bootFinished = true;
+    setTimeout(() => {
+        hideAuthLoading();
+        document.documentElement.classList.remove("booting");
+    }, wait);
+}
+
+function showBootError(message) {
+    showAuthLoading(message);
+    const overlay = document.getElementById("authLoadingScreen");
+    if (!overlay) return;
+    overlay.querySelector(".auth-loading-spinner")?.remove();
+    if (!overlay.querySelector(".boot-retry")) {
+        const retry = document.createElement("button");
+        retry.type = "button";
+        retry.className = "boot-retry";
+        retry.textContent = "Retry";
+        retry.onclick = () => location.reload();
+        overlay.appendChild(retry);
+    }
+}
+
+/* ---------- Date inputs (two inputs, one value) ---------- */
+function syncBarFromMain() {
+    const main = document.getElementById("calInput");
+    const bar = document.getElementById("calInputBar");
+    if (main && bar) bar.value = main.value;
+}
+
+window.syncDateInputs = function (source) {
+    const main = document.getElementById("calInput");
+    const bar = document.getElementById("calInputBar");
+    if (main && bar) { main.value = source.value; bar.value = source.value; }
+    window.refreshUI();
+};
+
+/* ---------- Track assistant (Groq, through the Cloudflare Worker) ---------- */
+const CHAT_ENDPOINT = "https://track.mohakchoubey.workers.dev/"; // paste your Worker URL here
+const CHAT_CATEGORIES = ["General", "Work", "Learning", "Health", "Personal"];
+let chatHistory = [];         // in memory only: cleared on reload, never saved
+let chatBusy = false;
+const chatToolResults = {};   // tool_call_id -> what happened (set after confirm / cancel)
+let chatRefMap = {};          // task_ref number shown to the assistant -> activity id
+let pendingConfirms = [];    // confirmation cards waiting for the user
+
+window.toggleChat = function () {
+    const panel = document.getElementById("chatPanel");
+    if (!panel) return;
+    panel.hidden = !panel.hidden;
+    document.getElementById("chatFab")?.setAttribute("aria-expanded", String(!panel.hidden));
+    if (!panel.hidden) {
+        if (!document.getElementById("chatLog").children.length) {
+            addChatBubble("bot", "Hi! I can add activities, mark them done or not done, and delete them. I always ask before changing anything.");
+        }
+        document.getElementById("chatInput").focus();
+    }
+};
+
+function addChatBubble(role, text) {
+    const log = document.getElementById("chatLog");
+    const el = document.createElement("div");
+    el.className = "chat-msg chat-" + role;
+    el.textContent = text;
+    log.appendChild(el);
+    log.scrollTop = log.scrollHeight;
+    return el;
+}
+
+function validDateOr(value, fallback) {
+    return /^\d{4}-\d{2}-\d{2}$/.test(value || "") ? value : fallback;
+}
+
+function viewingDate() {
+    return validDateOr(document.getElementById("calInput")?.value, todayKey());
+}
+
+// The same activities the Tracking screen shows for the viewed month.
+function chatVisibleTasks(date) {
+    const month = monthKeyFromDateKey(date);
+    return state.tasks.filter((t) => t.month === month);
+}
+
+function buildChatContext() {
+    const date = viewingDate();
+    const month = monthKeyFromDateKey(date);
+    const tasks = chatVisibleTasks(date);
+
+    // Remember which number points to which activity, so a confirmed action hits the right one.
+    chatRefMap = {};
+    const lines = tasks.map((t, i) => {
+        chatRefMap[i + 1] = t.id;
+        const done = getTaskLogData(date, t.id).completed;
+        return `${i + 1}. ${t.name} (category: ${t.category}, target: ${t.target} days, ${done ? "done" : "NOT DONE"} on ${date})`;
+    });
+    const remaining = tasks.filter((t) => !getTaskLogData(date, t.id).completed).length;
+
+    return `Today is ${todayKey()}. The user is viewing ${date}.\n` +
+        `Only the activities for the month being viewed (${month}) are listed. ` +
+        `${tasks.length} in total, ${remaining} not done on ${date}.\n` +
+        (lines.length ? "Activities (use the number as task_ref):\n" + lines.join("\n") : "There are no activities for this month.") +
+        "\nIf the user asks to mark, change or delete several or all activities, make one tool call for each matching activity. The app shows them as one confirmation.";
+}
+
+function buildRequestMessages() {
+    const out = [];
+    chatHistory.slice(-12).forEach((m) => {
+        if (m.role === "assistant" && m.tool_calls) {
+            out.push({ role: "assistant", content: m.content || null, tool_calls: m.tool_calls });
+            m.tool_calls.forEach((call) => {
+                out.push({
+                    role: "tool",
+                    tool_call_id: call.id,
+                    content: chatToolResults[call.id] || "Not confirmed yet. Do not assume it happened."
+                });
+            });
+        } else {
+            out.push({ role: m.role, content: m.content });
+        }
+    });
+    return out;
+}
+
+const CONFIRM_WORDS = /^\s*(i\s+)?(confirm|confirmed|yes|yep|yeah|ok|okay|do it|go ahead|haan|kar do)\s*[.!]?\s*$/i;
+
+window.sendChat = async function (event) {
+    event.preventDefault();
+    if (chatBusy) return;
+    const input = document.getElementById("chatInput");
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = "";
+    addChatBubble("user", text);
+
+    if (pendingConfirms.length && CONFIRM_WORDS.test(text)) {
+        pendingConfirms[pendingConfirms.length - 1].finish(true);
+        return;
+    }
+    chatHistory.push({ role: "user", content: text });
+
+    chatBusy = true;
+    try { await askAssistant(); } finally { chatBusy = false; }
+};
+
+async function askAssistant() {
+    const thinking = addChatBubble("bot", "Thinking…");
+    try {
+        const res = await fetch(CHAT_ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ context: buildChatContext(), messages: buildRequestMessages() })
+        });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const { message } = await res.json();
+        thinking.remove();
+
+        const entry = { role: "assistant", content: message.content || "" };
+        if (message.tool_calls?.length) entry.tool_calls = message.tool_calls;
+        chatHistory.push(entry);
+
+        if (message.content) addChatBubble("bot", message.content);
+        renderProposals(message.tool_calls || []);
+    } catch (err) {
+        console.error("Assistant error:", err);
+        thinking.textContent = "The assistant is unavailable right now. Your data is safe. Try again later.";
+    }
+}
+
+// Turns a tool request into a question plus an action. Nothing runs until the user confirms.
+function describeProposal(name, args) {
+    if (name === "add_task") {
+        const taskName = String(args.name || "").trim().slice(0, 60);
+        if (!taskName) return null;
+        const targetNum = Math.floor(Number(args.target));
+        const target = Number.isFinite(targetNum) && targetNum >= 1 ? Math.min(targetNum, 365) : 30;
+        const category = CHAT_CATEGORIES.includes(args.category) ? args.category : "General";
+        const date = validDateOr(args.date, viewingDate());
+        return {
+            kind: "add", label: `${taskName} (${category}, target ${target} days)`, date,
+            question: `Add "${taskName}" (${category}, target ${target} days) for ${date}?`,
+            apply: () => { createTask(taskName, target, category, date); return `Added "${taskName}".`; }
+        };
+    }
+
+    const taskId = chatRefMap[Number(args.task_ref)];
+    const task = state.tasks.find((t) => t.id === taskId);
+    if (!task) return null;
+    const id = task.id;
+    const date = validDateOr(args.date, viewingDate());
+
+    if (name === "mark_done") {
+        const completed = Boolean(args.completed);
+        return {
+            kind: completed ? "done" : "undone", label: task.name, date,
+            question: `Mark "${task.name}" as ${completed ? "done" : "not done"} for ${date}?`,
+            apply: () => {
+                const t = state.tasks.find((x) => x.id === id);
+                if (!t) return "That activity no longer exists.";
+                setTaskLogData(date, id, { completed });
+                finishChange("assistant-mark");
+                return `Marked "${t.name}" ${completed ? "done" : "not done"} for ${date}.`;
+            }
+        };
+    }
+
+    if (name === "delete_task") {
+        return {
+            kind: "delete", label: task.name, date,
+            question: `Delete "${task.name}" and all its history? This cannot be undone.`,
+            apply: () => {
+                const t = state.tasks.find((x) => x.id === id);
+                if (!t) return "That activity no longer exists.";
+                state.tasks = state.tasks.filter((x) => x.id !== id);
+                purgeTaskFromLogs(id);
+                finishChange("assistant-delete");
+                return `Deleted "${t.name}".`;
+            }
+        };
+    }
+    return null;
+}
+
+function createTask(name, target, category, dateKey) {
+    state.tasks.push({ id: now(), name, target, category, month: monthKeyFromDateKey(dateKey), createdAt: now(), updatedAt: now() });
+    finishChange("assistant-add");
+}
+
+function finishChange(reason) {
+    state.meta.updatedAt = now();
+    renderTasks();
+    if (isStatsVisible()) renderStats();
+    scheduleSync(reason);
+}
+
+// Groups similar actions (e.g. "mark 13 activities done") into one card with one Confirm button.
+function renderProposals(calls) {
+    const groups = {};
+    const order = [];
+    calls.forEach((call) => {
+        let args = {};
+        try { args = JSON.parse(call.function?.arguments || "{}"); } catch { args = {}; }
+        const proposal = describeProposal(call.function?.name, args);
+        if (!proposal) {
+            chatToolResults[call.id] = "Invalid or unknown request. Nothing was changed.";
+            return;
+        }
+        const key = proposal.kind + "|" + proposal.date;
+        if (!groups[key]) {
+            groups[key] = { kind: proposal.kind, date: proposal.date, items: [], callIds: [] };
+            order.push(key);
+        }
+        groups[key].items.push(proposal);
+        groups[key].callIds.push(call.id);
+    });
+    order.forEach((key) => renderGroup(groups[key]));
+}
+
+function groupQuestion(g) {
+    const n = g.items.length;
+    if (n === 1) return g.items[0].question;
+    const heads = {
+        add: `Add ${n} activities for ${g.date}?`,
+        done: `Mark ${n} activities as done for ${g.date}?`,
+        undone: `Mark ${n} activities as not done for ${g.date}?`,
+        delete: `Delete ${n} activities and all their history? This cannot be undone.`
+    };
+    return heads[g.kind] + "\n" + g.items.map((p) => "• " + p.label).join("\n");
+}
+
+function renderGroup(g) {
+    const log = document.getElementById("chatLog");
+    const card = document.createElement("div");
+    card.className = "chat-msg chat-proposal";
+    card.textContent = groupQuestion(g);
+
+    const row = document.createElement("div");
+    row.className = "chat-actions";
+    const yes = document.createElement("button");
+    yes.type = "button";
+    yes.className = "m-btn m-btn-save";
+    yes.textContent = "Confirm";
+    const no = document.createElement("button");
+    no.type = "button";
+    no.className = "m-btn m-btn-cancel";
+    no.textContent = "Cancel";
+    row.append(yes, no);
+    card.appendChild(row);
+    log.appendChild(card);
+    log.scrollTop = log.scrollHeight;
+
+    let answered = false;
+    const finish = (approved) => {
+        if (answered) return;
+        answered = true;
+        pendingConfirms = pendingConfirms.filter((p) => p.finish !== finish);
+        row.remove();
+
+        const status = document.createElement("div");
+        status.className = "chat-status";
+        if (approved) {
+            const results = g.items.map((p) => {
+                try { return p.apply(); }
+                catch (err) { console.error(err); return "Something went wrong."; }
+            });
+            const summary = g.items.length === 1 ? results[0] : `Updated ${g.items.length} activities.`;
+            g.callIds.forEach((id) => { chatToolResults[id] = "User confirmed. Result: " + summary; });
+            status.textContent = "✓ " + summary;
+        } else {
+            g.callIds.forEach((id) => { chatToolResults[id] = "User cancelled. Do not make this change."; });
+            status.textContent = "Cancelled";
+        }
+        card.appendChild(status);
+    };
+    yes.onclick = () => finish(true);
+    no.onclick = () => finish(false);
+    pendingConfirms.push({ finish });
+}
+
+/* ---------- Delete all data & legal ---------- */
+window.openDeleteAllModal = function () {
+    const input = document.getElementById("deleteAllInput");
+    if (input) input.value = "";
+    document.getElementById("deleteAllModal")?.classList.add("show");
+};
+
+window.confirmDeleteAll = async function () {
+    const typed = String(document.getElementById("deleteAllInput")?.value || "").trim();
+    if (typed !== "DELETE") return alert("Type DELETE (in capital letters) to confirm.");
+
+    if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+    const user = auth.currentUser;
+    if (user) {
+        try {
+            await db.collection("users").doc(user.uid).delete();
+        } catch (err) {
+            console.error("Delete failed:", err);
+            return alert("Could not delete your cloud data. Check your connection and try again.");
+        }
+    }
+
+    localStorage.removeItem(STORAGE_KEY);
+    state = getDefaultState();
+    window.closeModals();
+    setThemeOnDocument();
+    renderTasks();
+    if (isStatsVisible()) renderStats();
+    showExportToast("All data deleted");
+};
+
+window.openLegal = function () {
+    document.getElementById("legalModal")?.classList.add("show");
+};
+
 /* ---------- Init & Bindings ---------- */
 function bindModalButtons() {
     document.getElementById("saveEditBtn")?.addEventListener("click", handleSaveEdit);
@@ -1246,6 +1651,7 @@ function bindModalButtons() {
 document.addEventListener("DOMContentLoaded", () => {
     setThemeOnDocument();
     ensureDateInputDefault();
+    syncBarFromMain();
     startClock();
     bindModalButtons();
     renderTasks();
